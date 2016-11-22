@@ -1,1 +1,6 @@
 *pyc
+wikipedia
+*.cache
+*egg-info
+
+
