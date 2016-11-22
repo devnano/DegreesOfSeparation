@@ -7,3 +7,4 @@ class Node:
     def add_child(self, node):
         self._children_set.add(node)
 
+
