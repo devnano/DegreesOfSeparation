@@ -9,12 +9,11 @@ def test_children_set_after_creation():
     n = Node("")
     assert n._children_set is not None
 
-def test_pointed_by_nodes_after_add():
+def test_is_child_after_add():
     n1 = Node("")
     n2 = Node("")
     n1.add_child(n2)
     assert n2 in n1._children_set
-
 
 # generation code
 
