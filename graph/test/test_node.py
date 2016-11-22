@@ -1,4 +1,5 @@
 from node import Node
+from node import *
 
 def test_url_correct_after_creation():
     link = "link"
@@ -15,16 +16,7 @@ def test_is_child_after_add():
     n1.add_child(n2)
     assert n2 in n1._children_set
 
-# generation code
-
-generated_link_base_name = "generated_link_base_name_%d"
-
-def generate_link_name(index):
-    return generated_link_base_name % index
-
-def generate_unique_links(n):
-    links = {generate_link_name(x + 1) for x in range(1, n)}
-    return links
+# generation code test
 
 def test_generate_link_name():
     link_name = generate_link_name(1)
