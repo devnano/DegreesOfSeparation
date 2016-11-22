@@ -21,9 +21,12 @@ def generate_unique_links(n):
     return links
 
 def generate_random_links(source_links, n):
+    assert len(source_links) > n
     child_links = set()
+    l = list(source_links)
+
     while not len(child_links) == n:
-        link = source_links[randrange(0, len(source_links))]
+        link = l[randrange(0, len(source_links))]
         child_links.add(link)
     
     return child_links
