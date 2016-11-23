@@ -1,13 +1,18 @@
 class Node:
     _all_nodes = set()
     """Represents a Node in the Graph."""
-    def __init__(self, url):
+    def __init__(self, name):
         self._children_set = set()
-        self._url = url
+        self._name = name
         self.__class__._all_nodes.add(self)
 
     def add_child(self, node):
         self._children_set.add(node)
+
+    @classmethod
+    def create(self, name):
+        return Node(name)
+
 
     @classmethod
     def get_all_nodes(self):
