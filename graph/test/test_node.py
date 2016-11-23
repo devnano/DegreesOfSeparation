@@ -52,20 +52,20 @@ def test_generate_unique_links_type():
     unique_links = generate_unique_links(n)
     assert isinstance(unique_links, set)
 
-def test_generate_random_links():
+def test_generate_random_links(unique_node_names):
     n = 10
-    random_links = generate_random_links(source_links, n)
+    random_links = generate_random_links(unique_node_names, n)
     assert len(random_links) == n
 
-def test_generate_random_links_error():
-    n = len(source_links) + 1
+def test_generate_random_links_error(unique_node_names):
+    n = len(unique_node_names) + 1
     with pytest.raises(AssertionError):
-        generate_random_links(source_links, n)
+        generate_random_links(unique_node_names, n)
 
-def test_generate_node_random_links():
+def test_generate_node_random_links(unique_node_names):
     n = 10
     root_node = Node("")
-    generate_node_random_links(root_node, source_links, n)
+    generate_node_random_links(root_node, unique_node_names, n)
     assert len(root_node._children_set) == n
 
 # class methods
