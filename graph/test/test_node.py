@@ -112,5 +112,12 @@ def test_generate_node_random_names(unique_node_names):
     n = 10
     root_node = Node("")
     generate_node_random_names(root_node, unique_node_names, n)
-    assert len(root_node._children_set) == n
+    assert len(root_node.children()) == n
+
+#def test_generate_n_node_levels(unique_node_names):
+#    levels = 10
+#    max_children_per_level = 10
+#   root_node = Node("")
+#    generate_n_node_levels(root_node, unique_node_names, levels, max_childre_per_level)
+#   assert len(root_node._children_set) == n
 
