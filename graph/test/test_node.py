@@ -74,7 +74,13 @@ def test_node_get_all_nodes_set():
     all_nodes = Node.get_all_nodes()
     assert isinstance(all_nodes, set)
 
-def test_node_get_all_nodes_set():
+def test_node_all_nodes_len():
     root_node = Node("")
     all_nodes = Node.get_all_nodes()
     assert len(all_nodes) == 1
+
+def test_node_all_nodes_len_n(unique_node_names):
+    for name in unique_node_names:
+        Node(name)
+    all_nodes = Node.get_all_nodes()
+    assert len(all_nodes) == len(unique_node_names)
