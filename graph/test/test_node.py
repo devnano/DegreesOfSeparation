@@ -2,6 +2,20 @@ from node import Node
 from node import *
 import pytest
 
+def setup_function(function):
+    """ setup any state tied to the execution of the given function.
+    Invoked for every test function in the module.
+    """
+    print("setup")
+
+def teardown_function(function):
+    """ teardown any state that was previously setup with a setup_function
+    call.
+    """
+    print("tear down")
+
+# core functionlality tests
+
 def test_url_correct_after_creation():
     link = "link"
     n = Node(link)
@@ -51,3 +65,15 @@ def test_generate_node_random_links():
     root_node = Node("")
     generate_node_random_links(root_node, source_links, n)
     assert len(root_node._children_set) == n
+
+# class methods
+
+def test_node_get_all_nodes_set():
+    all_nodes = Node.get_all_nodes()
+    assert isinstance(all_nodes, set)
+
+
+#def test_node_get_all_nodes_set():
+#    root_node = Node("")
+#    all_nodes = Node.get_all_nodes()
+#    assert len(all_nodes) == 1
