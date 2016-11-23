@@ -68,6 +68,24 @@ def test_generate_node_random_names(unique_node_names):
     generate_node_random_names(root_node, unique_node_names, n)
     assert len(root_node._children_set) == n
 
+def test_node_hash():
+    name = "unique_name"
+    n1 = Node(name)
+    n2 = Node(name)
+    assert hash(n1) == hash(n2)
+
+def test_node_equality():
+    name = "unique_name"
+    n1 = Node(name)
+    n2 = Node(name)
+    assert n1 == n2
+
+def test_node_inequality():
+    name = "unique_name"
+    n1 = Node(name)
+    n2 = Node(name)
+    assert (n1 != n2) is False
+
 # class methods
 
 def test_node_get_all_nodes_set():
@@ -85,9 +103,9 @@ def test_node_all_nodes_len_n(unique_node_names):
     all_nodes = Node.get_all_nodes()
     assert len(all_nodes) == len(unique_node_names)
 
-def test_create_node_unique_instances():
-    name = "unique_name"
-    n1 = Node(name)
-    n2 = Node(name)
-    assert n1 == n2
+#def test_create_node_unique_instances():
+#    name = "unique_name"
+#    n1 = Node(name)
+#    n2 = Node(name)
+#    assert n1 == n2
     
