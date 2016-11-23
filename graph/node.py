@@ -1,12 +1,11 @@
 class Node:
     """Represents a Node in the Graph."""
 
-    _all_nodes = set()
+    _all_nodes = dict()
 
     def __init__(self, name):
         self._children_set = set()
         self._name = name
-        self.__class__._all_nodes.add(self)
 
     def add_child(self, node):
         self._children_set.add(node)
@@ -25,12 +24,17 @@ class Node:
         return not self.__eq__(other)
 
     @classmethod
-    def create(self, name):
-        return Node(name)
+    def create(cls, name):
+        if name in cls._all_nodes:
+            return cls._all_nodes[name]
+
+        node = Node(name)
+        cls._all_nodes[name] = node
+        return node
 
     @classmethod
-    def get_all_nodes(self):
-        return self._all_nodes
+    def get_all_nodes(cls):
+        return cls._all_nodes
 
 # generation code
 
