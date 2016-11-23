@@ -6,13 +6,12 @@ def setup_function(function):
     """ setup any state tied to the execution of the given function.
     Invoked for every test function in the module.
     """
-    print("setup")
+    Node._all_nodes = set()
 
 def teardown_function(function):
     """ teardown any state that was previously setup with a setup_function
     call.
     """
-    print("tear down")
 
 # core functionlality tests
 
@@ -72,8 +71,7 @@ def test_node_get_all_nodes_set():
     all_nodes = Node.get_all_nodes()
     assert isinstance(all_nodes, set)
 
-
-#def test_node_get_all_nodes_set():
-#    root_node = Node("")
-#    all_nodes = Node.get_all_nodes()
-#    assert len(all_nodes) == 1
+def test_node_get_all_nodes_set():
+    root_node = Node("")
+    all_nodes = Node.get_all_nodes()
+    assert len(all_nodes) == 1
