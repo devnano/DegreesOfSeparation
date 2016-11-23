@@ -114,10 +114,18 @@ def test_generate_node_random_names(unique_node_names):
     generate_node_random_names(root_node, unique_node_names, n)
     assert len(root_node.children()) == n
 
-#def test_generate_n_node_levels(unique_node_names):
-#    levels = 10
-#    max_children_per_level = 10
-#   root_node = Node("")
-#    generate_n_node_levels(root_node, unique_node_names, levels, max_childre_per_level)
-#   assert len(root_node._children_set) == n
+def test_generate_n_node_levels(unique_node_names):
+    levels = 2
+    min_children = 1
+    max_children = 10
+    root_node = Node.create(list(unique_node_names)[0])
+    generate_n_node_levels(root_node, unique_node_names, levels, min_children, max_children)
+    assert len(root_node.children()) > 0 
 
+def test_generate_n_node_levels_depth(unique_node_names):
+    levels = 6
+    min_children = 1
+    max_children = 10
+    root_node = Node.create(list(unique_node_names)[0])
+    generate_n_node_levels(root_node, unique_node_names, levels, min_children, max_children)
+    assert root_node.depth() == levels

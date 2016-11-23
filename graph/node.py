@@ -13,6 +13,21 @@ class Node:
     def children(self):
         return self._children_set
 
+    def depth(self):
+        return self._depth(0)
+
+    def _depth(self, current_level):
+        if len(self.children()) == 0:
+            # We are a leaf
+            return current_level
+
+        max_depth = 0
+        for child in self.children():
+            child_depth = child._depth(current_level + 1)
+            max_depth = child_depth if child_depth > max_depth else max_depth
+
+        return max_depth
+
     def __hash__(self):
         return hash(self._name)
 
@@ -69,3 +84,12 @@ def generate_node_random_names(node, source_names, n):
     for child_name in child_names:
         child_node = Node(child_name)
         node.add_child(child_node)
+
+def generate_n_node_levels(root_node, unique_node_names, levels, min_children, max_children):
+    if(levels == 0):
+        # Recursion ending condition
+        return
+    n = randrange(min_children, max_children)
+    generate_node_random_names(root_node, unique_node_names, n)
+    for child in root_node.children():
+        generate_n_node_levels(child, unique_node_names, levels - 1, min_children, max_children)
