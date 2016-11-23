@@ -59,7 +59,13 @@ def test_node_get_all_nodes_dict():
     all_nodes = Node.get_all_nodes()
     assert isinstance(all_nodes, dict)
 
-def test_node_all_nodes_len_n(unique_node_names):
+def test_create_node_all_nodes_len_1():
+    name = "test_name"
+    Node.create(name)
+    all_nodes = Node.get_all_nodes()
+    assert len(all_nodes) == 1
+
+def test_create_node_all_nodes_len_n(unique_node_names):
     for name in unique_node_names:
         Node.create(name)
     all_nodes = Node.get_all_nodes()
