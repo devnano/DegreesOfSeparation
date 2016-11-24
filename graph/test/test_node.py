@@ -242,6 +242,39 @@ def test_node_hierarchical_str_2_levels_2_child():
    ├──2
    └──3"""
 
+def test_node_hierarchical_str_3_levels_1_child():
+    n1 = Node.create("1")
+    n2 = Node.create("2")
+    n21 = Node.create("21")
+    n2.add_child(n21)
+    n3 = Node.create("3")
+    n1.add_child(n2)
+    n1.add_child(n3)
+
+    assert n1.hierarchical_str() == \
+"""1
+   ├──2
+      └──21
+   └──3"""
+
+def test_node_hierarchical_str_3_levels_2_child():
+    n1 = Node.create("1")
+    n2 = Node.create("2")
+    n21 = Node.create("21")
+    n2.add_child(n21)
+    n22 = Node.create("22")
+    n2.add_child(n22)
+    n3 = Node.create("3")
+    n1.add_child(n2)
+    n1.add_child(n3)
+
+    assert n1.hierarchical_str() == \
+"""1
+   ├──2
+      ├──21
+      └──22
+   └──3"""
+
 def test_generate_n_node_levels_depth(unique_node_names):
     levels = 3
     min_children = 1
