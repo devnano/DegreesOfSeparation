@@ -221,7 +221,7 @@ def test_node_hierarchical_str_single_level():
 
     assert n1.hierarchical_str() == "1"
 
-def test_node_hierarchical_str():
+def test_node_hierarchical_str_2_levels_1_child():
     n1 = Node.create("1")
     n2 = Node.create("2")
     n1.add_child(n2)
@@ -229,6 +229,18 @@ def test_node_hierarchical_str():
     assert n1.hierarchical_str() == \
 """1
    └──2"""
+
+def test_node_hierarchical_str_2_levels_2_child():
+    n1 = Node.create("1")
+    n2 = Node.create("2")
+    n3 = Node.create("3")
+    n1.add_child(n2)
+    n1.add_child(n3)
+
+    assert n1.hierarchical_str() == \
+"""1
+   ├──2
+   └──3"""
 
 def test_generate_n_node_levels_depth(unique_node_names):
     levels = 3
