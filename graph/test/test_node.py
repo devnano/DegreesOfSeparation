@@ -228,8 +228,7 @@ def test_node_hierarchical_str():
 
     assert n1.hierarchical_str() == \
 """1
-   └──2
-"""
+   └──2"""
 
 def test_generate_n_node_levels_depth(unique_node_names):
     levels = 3

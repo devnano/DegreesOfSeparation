@@ -24,11 +24,22 @@ class Node:
         return self._depth(set())
 
     def hierarchical_str(self):
-        return self._hierarchical_str(0)
+        str_segments = list()
+        self._hierarchical_str(str_segments, 0, 0, 0)
 
-    def _hierarchical_str(self, level):
-        if(len(self.children()) == 0):
-            return self._name
+        return "\n".join(str_segments)
+
+    def _hierarchical_str(self, str_segments, level, i_sibling, n_siblings):
+        indent_spaces_n = 3
+        indent = ' ' * indent_spaces_n * level
+        segment = "%s%s%s" % (indent, hierarchical_str_prefix(level, i_sibling, n_siblings), self._name)
+        str_segments.append(segment)
+
+        i = 0
+        n = len(self.children())
+        for child in self.children():
+            child._hierarchical_str(str_segments, level + 1, i, n)
+            i = i + 1
     
     def _depth(self, branch):
 #        branch_len = lambda b: len(b)
