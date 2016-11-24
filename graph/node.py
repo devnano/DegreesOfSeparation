@@ -1,15 +1,17 @@
+from collections import OrderedDict
+
 class Node:
     """Represents a Node in the Graph."""
 
     _all_nodes = dict()
 
     def __init__(self, name):
-        self._children_set = set()
+        self._children_map = OrderedDict()
         self._name = name
         self._are_all_children_created = False
 
     def add_child(self, node):
-        self._children_set.add(node)
+        self._children_map[node._name] = node
         
     def are_all_children_created(self):
         return self._are_all_children_created
@@ -18,7 +20,7 @@ class Node:
         self._are_all_children_created = True
 
     def children(self):
-        return self._children_set
+        return self._children_map.values()
 
     def depth(self):
         return self._depth(set())

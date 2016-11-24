@@ -22,13 +22,13 @@ def test_name_correct_after_creation():
 
 def test_children_set_after_creation():
     n = Node("")
-    assert n._children_set is not None
+    assert n._children_map is not None
 
 def test_is_child_after_add():
     n1 = Node("")
     n2 = Node("")
     n1.add_child(n2)
-    assert n2 in n1._children_set
+    assert n2 in n1.children()
 
 def test_not_all_children_created():
     n = Node("")
