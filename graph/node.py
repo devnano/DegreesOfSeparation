@@ -6,24 +6,46 @@ class Node:
     def __init__(self, name):
         self._children_set = set()
         self._name = name
+        self._are_all_children_created = False
 
     def add_child(self, node):
         self._children_set.add(node)
+        
+    def are_all_children_created(self):
+        return self._are_all_children_created
+
+    def set_all_children_created(self):
+        self._are_all_children_created = True
 
     def children(self):
         return self._children_set
 
     def depth(self):
-        return self._depth(0)
+        return self._depth(set())
 
-    def _depth(self, current_level):
+    def hierarchical_str(self):
+        return self._hierarchical_str(0)
+
+    def _hierarchical_str(self, level):
+        if(len(self.children()) == 0):
+            return self._name
+    
+    def _depth(self, branch):
+#        branch_len = lambda b: len(b)
+        if self in branch:
+            # We hit a loop, return branch len:
+            return len(branch)
+
+        branch.add(self)
+
         if len(self.children()) == 0:
-            # We are a leaf
-            return current_level
+            # We are a leaf, return len
+            return len(branch)
 
         max_depth = 0
         for child in self.children():
-            child_depth = child._depth(current_level + 1)
+            # create a new branch
+            child_depth = child._depth(branch.copy())
             max_depth = child_depth if child_depth > max_depth else max_depth
 
         return max_depth
@@ -41,6 +63,9 @@ class Node:
         """Define a non-equality test"""
         return not self.__eq__(other)
 
+    def __str__(self):
+        return self._name
+
     @classmethod
     def create(cls, name):
         if name in cls._all_nodes:
@@ -53,6 +78,19 @@ class Node:
     @classmethod
     def get_all_nodes(cls):
         return cls._all_nodes
+
+
+# util function
+
+def hierarchical_str_prefix(level, i_sibling, n_siblings):
+    assert level != 0 and i_sibling < n_siblings or level == 0 and n_siblings == 0 and i_sibling == 0
+
+    if level == 0:
+        return ""
+    if n_siblings == 1 or i_sibling == n_siblings -1:
+        return "└──"
+
+    return "├──"
 
 # generation code
 
@@ -82,14 +120,19 @@ def generate_node_random_names(node, source_names, n):
     child_names = generate_random_names(source_names, n)
 
     for child_name in child_names:
-        child_node = Node(child_name)
+        child_node = Node.create(child_name)        
         node.add_child(child_node)
 
+    node.set_all_children_created()
+
 def generate_n_node_levels(root_node, unique_node_names, levels, min_children, max_children):
-    if(levels == 0):
+    if(levels == 1 or root_node.are_all_children_created()):
         # Recursion ending condition
         return
     n = randrange(min_children, max_children)
     generate_node_random_names(root_node, unique_node_names, n)
     for child in root_node.children():
         generate_n_node_levels(child, unique_node_names, levels - 1, min_children, max_children)
+
+
+
