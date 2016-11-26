@@ -27,20 +27,20 @@ class Node:
 
     def hierarchical_str(self):
         str_segments = list()
-        self._hierarchical_str(str_segments, 0, 0, 0)
+        self._hierarchical_str(str_segments)
 
         return "\n".join(str_segments)
 
-    def _hierarchical_str(self, str_segments, level, i_sibling, n_siblings):
-        indent_spaces_n = 3
-        indent = ' ' * indent_spaces_n * level
-        segment = "%s%s%s" % (indent, hierarchical_str_prefix(level, i_sibling, n_siblings), self._name)
+    def _hierarchical_str(self, str_segments, level=0, i_sibling=0, n_siblings=1, indent_str=''):
+        segment = "%s%s%s" % (indent_str, hierarchical_str_prefix(level, i_sibling, n_siblings), self._name)
         str_segments.append(segment)
+
+        indent_str = "%s%s" % (indent_str, get_hierarchical_indent(level, i_sibling, n_siblings))
 
         i = 0
         n = len(self.children())
         for child in self.children():
-            child._hierarchical_str(str_segments, level + 1, i, n)
+            child._hierarchical_str(str_segments, level + 1, i, n, indent_str)
             i = i + 1
     
     def _depth(self, branch):
@@ -96,14 +96,23 @@ class Node:
 # util function
 
 def hierarchical_str_prefix(level, i_sibling, n_siblings):
-    assert level != 0 and i_sibling < n_siblings or level == 0 and n_siblings == 0 and i_sibling == 0
+    assert i_sibling < n_siblings
 
     if level == 0:
         return ""
+
     if n_siblings == 1 or i_sibling == n_siblings -1:
         return "└──"
 
     return "├──"
+
+def get_hierarchical_indent(parent_level, i_sibling, n_siblings):
+    assert i_sibling < n_siblings
+
+    if(parent_level == 0):
+        return ""
+
+    return "   " if i_sibling == n_siblings -1 else "|  "
 
 # generation code
 
