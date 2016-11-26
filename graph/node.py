@@ -1,4 +1,5 @@
 from collections import OrderedDict
+import pdb
 
 class Node:
     """Represents a Node in the Graph."""
@@ -22,31 +23,13 @@ class Node:
     def children(self):
         return self._children_map.values()
 
-    def depth(self):
-        return self._depth(set())
+    def max_depth(self):                
+#        pdb.set_trace()
+        return self._max_depth(set())
 
-    def hierarchical_str(self):
-        str_segments = list()
-        self._hierarchical_str(str_segments)
-
-        return "\n".join(str_segments)
-
-    def _hierarchical_str(self, str_segments, level=0, i_sibling=0, n_siblings=1, indent_str=''):
-        segment = "%s%s%s" % (indent_str, hierarchical_str_prefix(level, i_sibling, n_siblings), self._name)
-        str_segments.append(segment)
-
-        indent_str = "%s%s" % (indent_str, get_hierarchical_indent(level, i_sibling, n_siblings))
-
-        i = 0
-        n = len(self.children())
-        for child in self.children():
-            child._hierarchical_str(str_segments, level + 1, i, n, indent_str)
-            i = i + 1
-    
-    def _depth(self, branch):
-#        branch_len = lambda b: len(b)
+    def _max_depth(self, branch):
         if self in branch:
-            # We hit a loop, return branch len:
+            # We hit a loop, max_depth
             return len(branch)
 
         branch.add(self)
@@ -58,11 +41,37 @@ class Node:
         max_depth = 0
         for child in self.children():
             # create a new branch
-            child_depth = child._depth(branch.copy())
-            max_depth = child_depth if child_depth > max_depth else max_depth
+            child_max_depth = child._max_depth(branch.copy())
+            max_depth = child_max_depth if child_max_depth > max_depth else max_depth
 
         return max_depth
 
+#    def _rec
+
+    def hierarchical_str(self):
+        str_segments = list()
+        self._hierarchical_str(str_segments, set())
+
+        return "\n".join(str_segments)
+
+    def _hierarchical_str(self, str_segments, branch, level=0, i_sibling=0, n_siblings=1, indent_str=''):
+        if self in branch:
+            # We hit a loop, max_depth
+            return ""
+
+        branch.add(self)
+
+        segment = "%s%s%s" % (indent_str, hierarchical_str_prefix(level, i_sibling, n_siblings), self._name)
+        str_segments.append(segment)
+
+        indent_str = "%s%s" % (indent_str, get_hierarchical_indent(level, i_sibling, n_siblings))
+
+        i = 0
+        n = len(self.children())
+        for child in self.children():
+            child._hierarchical_str(str_segments, branch.copy(), level + 1, i, n, indent_str)
+            i = i + 1
+    
     def __hash__(self):
         return hash(self._name)
 
@@ -102,9 +111,9 @@ def hierarchical_str_prefix(level, i_sibling, n_siblings):
         return ""
 
     if n_siblings == 1 or i_sibling == n_siblings -1:
-        return "└──"
+        return "└── "
 
-    return "├──"
+    return "├── "
 
 def get_hierarchical_indent(parent_level, i_sibling, n_siblings):
     assert i_sibling < n_siblings

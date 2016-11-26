@@ -12,7 +12,6 @@ def teardown_function(function):
     """ teardown any state that was previously setup with a setup_function
     call.
     """
-
 # core functionlality tests
 
 def test_name_correct_after_creation():
@@ -29,6 +28,17 @@ def test_is_child_after_add():
     n2 = Node("")
     n1.add_child(n2)
     assert n2 in n1.children()
+
+def test_children_len_before_any_add():
+    n1 = Node("")
+
+    assert len(n1.children()) == 0
+
+def test_children_len_after_add():
+    n1 = Node("")
+    n2 = Node("")
+    n1.add_child(n2)
+    assert len(n1.children()) == 1
 
 def test_not_all_children_created():
     n = Node("")
@@ -124,27 +134,27 @@ def test_generate_node_random_names(unique_node_names):
     generate_node_random_names(root_node, unique_node_names, n)
     assert len(root_node.children()) == n
 
-def test_depth_1p():
+def test_max_depth_1():
     n1 = Node.create("1")
 
-    assert n1.depth() == 1
+    assert n1.max_depth() == 1
 
-def test_depth_loop():
+def test_max_depth_loop():
     n1 = Node.create("1")
     n2 = Node.create("2")
     n1.add_child(n2)
     n2.add_child(n1)
 
-    assert n1.depth() == 2
+    assert n1.max_depth() == 2
 
-def test_depth_2():
+def test_max_depth_2():
     n1 = Node.create("1")
     n2 = Node.create("2")
     n1.add_child(n2)
 
-    assert n1.depth() == 2
+    assert n1.max_depth() == 2
 
-def test_depth_3_multi_child():
+def test_max_depth_3_multi_child():
     n1 = Node.create("1")
     n2 = Node.create("2")
     n21 = Node.create("21")
@@ -156,9 +166,9 @@ def test_depth_3_multi_child():
     n2.add_child(n22)
     n2.add_child(n23)
 
-    assert n1.depth() == 3
+    assert n1.max_depth() == 3
 
-def test_depth_3_multi_child_on_each_level():
+def test_max_depth_3_multi_child_on_each_level():
     n1 = Node.create("1")
     n11 = Node.create("11")
     n12 = Node.create("12")
@@ -186,7 +196,7 @@ def test_depth_3_multi_child_on_each_level():
     n12.add_child(n123)
     n12.add_child(n124)
 
-    assert n1.depth() == 3
+    assert n1.max_depth() == 3
 
 def test_generate_n_node_levels(unique_node_names):
     levels = 2
@@ -202,19 +212,19 @@ def test_node_hierarchical_str_prefix_level_0():
 
 def test_node_hierarchical_str_prefix_level_n_single_child():
     prefix = hierarchical_str_prefix(5, 0, 1)
-    assert prefix == "└──"
+    assert prefix == "└── "
 
 def test_node_hierarchical_str_prefix_level_n_first_node_not_single_child():
     prefix = hierarchical_str_prefix(1, 0, 2)
-    assert prefix == "├──"
+    assert prefix == "├── "
 
 def test_node_hierarchical_str_prefix_level_n_middle_child():
     prefix = hierarchical_str_prefix(3, 2, 5)
-    assert prefix == "├──"
+    assert prefix == "├── "
 
 def test_node_hierarchical_str_prefix_level_n_last_child():
     prefix = hierarchical_str_prefix(3, 4, 5)
-    assert prefix == "└──"
+    assert prefix == "└── "
 
 def test_get_hierarchical_indent_level_0_last_sibling():
     indent = get_hierarchical_indent(0, 0, 1)
@@ -241,7 +251,7 @@ def test_node_hierarchical_str_2_levels_1_child():
 
     assert n1.hierarchical_str() == \
 """1
-└──2"""
+└── 2"""
 
 def test_node_hierarchical_str_2_levels_2_child():
     n1 = Node.create("1")
@@ -252,8 +262,8 @@ def test_node_hierarchical_str_2_levels_2_child():
 
     assert n1.hierarchical_str() == \
 """1
-├──2
-└──3"""
+├── 2
+└── 3"""
 
 def test_node_hierarchical_str_3_levels_1_child():
     n1 = Node.create("1")
@@ -266,9 +276,9 @@ def test_node_hierarchical_str_3_levels_1_child():
 
     expected = \
 """1
-├──2
-|  └──21
-└──3"""
+├── 2
+|  └── 21
+└── 3"""
 
     result = n1.hierarchical_str()
 
@@ -291,15 +301,27 @@ def test_node_hierarchical_str_3_levels_2_child():
 
     assert n1.hierarchical_str() == \
 """1
-├──2
-|  ├──21
-|  └──22
-└──3"""
+├── 2
+|  ├── 21
+|  └── 22
+└── 3"""
 
-def test_generate_n_node_levels_depth(unique_node_names):
+def test_node_hierarchical_str_loop():
+    n1 = Node.create("1")
+    n2 = Node.create("2")
+    n1.add_child(n2)
+    n2.add_child(n1)
+
+    assert n1.hierarchical_str() == \
+"""1
+└── 2"""
+
+
+def test_generate_n_node_levels_max_depth(unique_node_names):
     levels = 3
     min_children = 1
     max_children = 10
     root_node = Node.create(list(unique_node_names)[0])
     generate_n_node_levels(root_node, unique_node_names, levels, min_children, max_children)
-    assert root_node.depth() == levels
+    print(root_node.hierarchical_str())
+    assert root_node.max_depth() == levels
