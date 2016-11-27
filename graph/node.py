@@ -125,7 +125,15 @@ def get_hierarchical_indent(parent_level, i_sibling, n_siblings):
 
 # generation code
 
+# random
+
 from random import randrange
+
+
+def _randrange(start, stop):
+    i = randrange(start, stop)
+
+    return i
 
 generated_name_base_name = "generated_name_base_name_%d"
 
@@ -136,19 +144,19 @@ def generate_unique_names(n):
     names = {generate_name_name(x + 1) for x in range(0, n)}
     return names
 
-def generate_random_names(source_names, n):
+def generate_random_names(source_names, n, randr=_randrange):
     assert len(source_names) > n
     child_names = set()
     l = list(source_names)
 
     while not len(child_names) == n:
-        name = l[randrange(0, len(source_names))]
+        name = l[randr(0, len(source_names))]
         child_names.add(name)
     
     return child_names
 
-def generate_node_random_names(node, source_names, n):
-    child_names = generate_random_names(source_names, n)
+def generate_node_random_names(node, source_names, n, randr=_randrange):
+    child_names = generate_random_names(source_names, n, randr)
 
     for child_name in child_names:
         child_node = Node.create(child_name)        
@@ -156,14 +164,13 @@ def generate_node_random_names(node, source_names, n):
 
     node.set_all_children_created()
 
-def generate_n_node_levels(root_node, unique_node_names, levels, min_children, max_children):
+def generate_n_node_levels(root_node, unique_node_names, levels, min_children, max_children, randr=_randrange):
     if(levels == 1 or root_node.are_all_children_created()):
         # Recursion ending condition
         return
-    n = randrange(min_children, max_children)
-    generate_node_random_names(root_node, unique_node_names, n)
+    n = randr(min_children, max_children)
+
+    generate_node_random_names(root_node, unique_node_names, n, randr)
     for child in root_node.children():
-        generate_n_node_levels(child, unique_node_names, levels - 1, min_children, max_children)
-
-
+        generate_n_node_levels(child, unique_node_names, levels - 1, min_children, max_children, randr)
 

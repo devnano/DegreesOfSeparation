@@ -1,17 +1,66 @@
 from node import Node
 from node import *
+import pdb
+
 import pytest
+
+# tests setup
 
 def setup_function(function):
     """ setup any state tied to the execution of the given function.
     Invoked for every test function in the module.
     """
     Node._all_nodes = dict()
+    reset_randrange()
+    reset_all_generated_rand_ints()
 
 def teardown_function(function):
     """ teardown any state that was previously setup with a setup_function
     call.
     """
+# testing random stuff
+from random import randrange
+
+rand_ints = [8, 17, 7, 2, 44, 48, 14, 34, 13, 8, 41, 5, 42, 22, 21, 11, 12, 29, 1, 3, 2, 2, 11, 3, 16, 14, 8, 1, 44, 6, 39, 39, 19, 12, 46, 47, 42, 3, 39, 1, 45, 5, 20, 27, 44, 30, 47]
+test_randrange_i = 0
+all_rand_ints = None
+
+def get_all_generated_rand_ints():
+    return all_rand_ints
+
+def reset_all_generated_rand_ints():
+    global all_rand_ints
+
+    all_rand_ints = list()
+
+def deterministic_randrange(start, end):
+    global test_randrange_i
+    global rand_ints
+    global all_rand_ints
+
+    test_randrange_i += 1
+#    print(test_randrange_i)
+    i = rand_ints[test_randrange_i]
+#    i = randrange(start, end)
+    all_rand_ints.append(i)
+    return i
+
+def reset_randrange():
+    global test_randrange_i
+    test_randrange_i = -1
+
+def test_deterministic_randrange_generation():
+    i = deterministic_randrange(1, 10)
+    assert i == 8
+    i = deterministic_randrange(1, 10)
+    assert i == 17
+
+def test_deterministic_randrange_generation_second_run():
+    i = deterministic_randrange(1, 10)
+    assert i == 8
+    i = deterministic_randrange(1, 10)
+    assert i == 17
+
 # core functionlality tests
 
 def test_name_correct_after_creation():
@@ -101,8 +150,12 @@ def test_create_node_unique_instances():
 @pytest.fixture
 def unique_node_names():
 #    source_names = generate_unique_names(2000)
-    source_names = {'generated_name_base_name_20', 'generated_name_base_name_17', 'generated_name_base_name_23', 'generated_name_base_name_38', 'generated_name_base_name_16', 'generated_name_base_name_27', 'generated_name_base_name_36', 'generated_name_base_name_49', 'generated_name_base_name_11', 'generated_name_base_name_21', 'generated_name_base_name_30', 'generated_name_base_name_10', 'generated_name_base_name_26', 'generated_name_base_name_6', 'generated_name_base_name_5', 'generated_name_base_name_4', 'generated_name_base_name_35', 'generated_name_base_name_40', 'generated_name_base_name_37', 'generated_name_base_name_25', 'generated_name_base_name_13', 'generated_name_base_name_22', 'generated_name_base_name_50', 'generated_name_base_name_43', 'generated_name_base_name_9', 'generated_name_base_name_8', 'generated_name_base_name_34', 'generated_name_base_name_41', 'generated_name_base_name_46', 'generated_name_base_name_29', 'generated_name_base_name_32', 'generated_name_base_name_18', 'generated_name_base_name_42', 'generated_name_base_name_28', 'generated_name_base_name_48', 'generated_name_base_name_44', 'generated_name_base_name_12', 'generated_name_base_name_19', 'generated_name_base_name_3', 'generated_name_base_name_45', 'generated_name_base_name_39', 'generated_name_base_name_7', 'generated_name_base_name_15', 'generated_name_base_name_47', 'generated_name_base_name_2', 'generated_name_base_name_31', 'generated_name_base_name_33', 'generated_name_base_name_24', 'generated_name_base_name_14'}
+    source_names = ['generated_name_base_name_20', 'generated_name_base_name_17', 'generated_name_base_name_23', 'generated_name_base_name_38', 'generated_name_base_name_16', 'generated_name_base_name_27', 'generated_name_base_name_36', 'generated_name_base_name_49', 'generated_name_base_name_11', 'generated_name_base_name_21', 'generated_name_base_name_30', 'generated_name_base_name_10', 'generated_name_base_name_26', 'generated_name_base_name_6', 'generated_name_base_name_5', 'generated_name_base_name_4', 'generated_name_base_name_35', 'generated_name_base_name_40', 'generated_name_base_name_37', 'generated_name_base_name_25', 'generated_name_base_name_13', 'generated_name_base_name_22', 'generated_name_base_name_50', 'generated_name_base_name_43', 'generated_name_base_name_9', 'generated_name_base_name_8', 'generated_name_base_name_34', 'generated_name_base_name_41', 'generated_name_base_name_46', 'generated_name_base_name_29', 'generated_name_base_name_32', 'generated_name_base_name_18', 'generated_name_base_name_42', 'generated_name_base_name_28', 'generated_name_base_name_48', 'generated_name_base_name_44', 'generated_name_base_name_12', 'generated_name_base_name_19', 'generated_name_base_name_3', 'generated_name_base_name_45', 'generated_name_base_name_39', 'generated_name_base_name_7', 'generated_name_base_name_15', 'generated_name_base_name_47', 'generated_name_base_name_2', 'generated_name_base_name_31', 'generated_name_base_name_33', 'generated_name_base_name_24', 'generated_name_base_name_14']
     return source_names
+
+def test_unique_node_names_order(unique_node_names):
+    assert list(unique_node_names)[0] == 'generated_name_base_name_20'
+    assert list(unique_node_names)[-1] == 'generated_name_base_name_14'
 
 def test_generate_name_name():
     name_name = generate_name_name(1)
@@ -316,12 +369,14 @@ def test_node_hierarchical_str_loop():
 """1
 └── 2"""
 
-
-def test_generate_n_node_levels_max_depth(unique_node_names):
+def test_generate_n_node_levels_at_lest_max_depth(unique_node_names):
     levels = 3
     min_children = 1
     max_children = 10
     root_node = Node.create(list(unique_node_names)[0])
-    generate_n_node_levels(root_node, unique_node_names, levels, min_children, max_children)
-    print(root_node.hierarchical_str())
-    assert root_node.max_depth() == levels
+
+    generate_n_node_levels(root_node, unique_node_names, levels, min_children, max_children, deterministic_randrange)
+#    print(get_all_generated_rand_ints())
+#    print(root_node.hierarchical_str())
+    # Check that max_depth is at least levels. It could be more than levels since a branch already created can be attached to a certain depth resulting beyond levels
+    assert root_node.max_depth() >= levels
