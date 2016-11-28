@@ -188,7 +188,6 @@ import sys
 if __name__ == "__main__":
     print(sys.argv[1:])
     get_int_arg = lambda i, d: int(sys.argv[i]) if len(sys.argv) > i else d
-    pdb.set_trace()
     n_nodes = get_int_arg(1, 100)
     levels = get_int_arg(2, 5)
     min_children_per_level = get_int_arg(3, 1)
@@ -201,4 +200,3 @@ if __name__ == "__main__":
     generate_n_node_levels(root_node, unique_names, levels, min_children_per_level, max_children_per_level)
     print(root_node.hierarchical_str())
     print(all_random_ints_generated)
-#    print("hello world")
