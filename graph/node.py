@@ -50,19 +50,19 @@ class Node:
 
     def hierarchical_str(self):
         str_segments = list()
-        self._hierarchical_str(str_segments, set())
+        self._hierarchical_str(str_segments, list())
 
         return "\n".join(str_segments)
 
     def _hierarchical_str(self, str_segments, branch, level=0, i_sibling=0, n_siblings=1, indent_str=''):
+        segment = "%s%s%s" % (indent_str, hierarchical_str_prefix(level, i_sibling, n_siblings), self._name)
+        str_segments.append(segment)
+
         if self in branch:
             # We hit a loop, max_depth
             return ""
 
-        branch.add(self)
-
-        segment = "%s%s%s" % (indent_str, hierarchical_str_prefix(level, i_sibling, n_siblings), self._name)
-        str_segments.append(segment)
+        branch.append(self)
 
         indent_str = "%s%s" % (indent_str, get_hierarchical_indent(level, i_sibling, n_siblings))
 
@@ -121,7 +121,7 @@ def get_hierarchical_indent(parent_level, i_sibling, n_siblings):
     if(parent_level == 0):
         return ""
 
-    return "   " if i_sibling == n_siblings -1 else "|  "
+    return "    " if i_sibling == n_siblings -1 else "|   "
 
 # generation code
 
@@ -129,11 +129,15 @@ def get_hierarchical_indent(parent_level, i_sibling, n_siblings):
 
 from random import randrange
 
+all_random_ints_generated = list()
 
 def _randrange(start, stop):
     i = randrange(start, stop)
-
+    all_random_ints_generated.append(i)
     return i
+
+def reset_all_random_ints_generated():
+    all_random_ints_generated = list()
 
 generated_name_base_name = "generated_name_base_name_%d"
 
@@ -146,12 +150,15 @@ def generate_unique_names(n):
 
 def generate_random_names(source_names, n, randr=_randrange):
     assert len(source_names) > n
-    child_names = set()
+    child_names = list()
     l = list(source_names)
 
     while not len(child_names) == n:
         name = l[randr(0, len(source_names))]
-        child_names.add(name)
+        if name in child_names:
+            continue
+
+        child_names.append(name)
     
     return child_names
 
@@ -174,3 +181,24 @@ def generate_n_node_levels(root_node, unique_node_names, levels, min_children, m
     for child in root_node.children():
         generate_n_node_levels(child, unique_node_names, levels - 1, min_children, max_children, randr)
 
+# Main Executable
+
+import sys
+
+if __name__ == "__main__":
+    print(sys.argv[1:])
+    get_int_arg = lambda i, d: int(sys.argv[i]) if len(sys.argv) > i else d
+    pdb.set_trace()
+    n_nodes = get_int_arg(1, 100)
+    levels = get_int_arg(2, 5)
+    min_children_per_level = get_int_arg(3, 1)
+    max_children_per_level = get_int_arg(4, 10)
+
+    unique_names = list(generate_unique_names(n_nodes))
+    root_node = Node.create(unique_names[0])
+
+    reset_all_random_ints_generated()
+    generate_n_node_levels(root_node, unique_names, levels, min_children_per_level, max_children_per_level)
+    print(root_node.hierarchical_str())
+    print(all_random_ints_generated)
+#    print("hello world")

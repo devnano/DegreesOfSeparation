@@ -13,6 +13,8 @@ def setup_function(function):
     Node._all_nodes = dict()
     reset_randrange()
     reset_all_generated_rand_ints()
+    set_test_rand_ints([8, 17, 7, 2, 44, 48, 14, 34, 13, 8, 41, 5, 42, 22, 21, 11, 12, 29, 1, 3, 2, 2, 11, 3, 16, 14, 8, 1, 44, 6, 39, 39, 19, 12, 46, 47, 42, 3, 39, 1, 45, 5, 20, 27, 44, 30, 47])
+
 
 def teardown_function(function):
     """ teardown any state that was previously setup with a setup_function
@@ -21,7 +23,7 @@ def teardown_function(function):
 # testing random stuff
 from random import randrange
 
-rand_ints = [8, 17, 7, 2, 44, 48, 14, 34, 13, 8, 41, 5, 42, 22, 21, 11, 12, 29, 1, 3, 2, 2, 11, 3, 16, 14, 8, 1, 44, 6, 39, 39, 19, 12, 46, 47, 42, 3, 39, 1, 45, 5, 20, 27, 44, 30, 47]
+rand_ints = list()
 test_randrange_i = 0
 all_rand_ints = None
 
@@ -37,13 +39,17 @@ def deterministic_randrange(start, end):
     global test_randrange_i
     global rand_ints
     global all_rand_ints
-
+#    pdb.set_trace()
     test_randrange_i += 1
 #    print(test_randrange_i)
     i = rand_ints[test_randrange_i]
 #    i = randrange(start, end)
     all_rand_ints.append(i)
     return i
+
+def set_test_rand_ints(_rand_ints):
+    global rand_ints
+    rand_ints = _rand_ints
 
 def reset_randrange():
     global test_randrange_i
@@ -183,7 +189,7 @@ def test_generate_random_names_error(unique_node_names):
 
 def test_generate_node_random_names(unique_node_names):
     n = 10
-    root_node = Node.create(list(unique_node_names)[0])
+    root_node = Node.create(unique_node_names[0])
     generate_node_random_names(root_node, unique_node_names, n)
     assert len(root_node.children()) == n
 
@@ -285,11 +291,11 @@ def test_get_hierarchical_indent_level_0_last_sibling():
 
 def test_get_hierarchical_indent_level_1_last_sibling():
     indent = get_hierarchical_indent(1, 0, 1)
-    assert indent == "   "
+    assert indent == "    "
 
 def test_get_hierarchical_indent_level_1_more_sibling():
     indent = get_hierarchical_indent(1, 0, 5)
-    assert indent == "|  "
+    assert indent == "|   "
 
 def test_node_hierarchical_str_single_level():
     n1 = Node.create("1")
@@ -330,7 +336,7 @@ def test_node_hierarchical_str_3_levels_1_child():
     expected = \
 """1
 ├── 2
-|  └── 21
+|   └── 21
 └── 3"""
 
     result = n1.hierarchical_str()
@@ -355,8 +361,8 @@ def test_node_hierarchical_str_3_levels_2_child():
     assert n1.hierarchical_str() == \
 """1
 ├── 2
-|  ├── 21
-|  └── 22
+|   ├── 21
+|   └── 22
 └── 3"""
 
 def test_node_hierarchical_str_loop():
@@ -367,16 +373,98 @@ def test_node_hierarchical_str_loop():
 
     assert n1.hierarchical_str() == \
 """1
-└── 2"""
+└── 2
+    └── 1"""
+
+def test_node_hierarchical_str_loop_2():
+    n1 = Node.create("1")
+    n2 = Node.create("2")
+    n1.add_child(n2)
+    n2.add_child(n1)
+    n1.add_child(n1)
+
+    assert n1.hierarchical_str() == \
+"""1
+├── 2
+|   └── 1
+└── 1"""
 
 def test_generate_n_node_levels_at_lest_max_depth(unique_node_names):
     levels = 3
     min_children = 1
     max_children = 10
     root_node = Node.create(list(unique_node_names)[0])
-
     generate_n_node_levels(root_node, unique_node_names, levels, min_children, max_children, deterministic_randrange)
-#    print(get_all_generated_rand_ints())
-#    print(root_node.hierarchical_str())
+
+    print(get_all_generated_rand_ints())
+    print(root_node.hierarchical_str())
     # Check that max_depth is at least levels. It could be more than levels since a branch already created can be attached to a certain depth resulting beyond levels
     assert root_node.max_depth() >= levels
+
+def test_generate_n_node_levels_bad_hierarchical_str(unique_node_names):
+    levels = 3
+    min_children = 2
+    max_children = 5
+    root_node = Node.create(list(unique_node_names)[0])
+    rand_ints = [3, 5, 9, 8, 4, 2, 2, 9, 2, 8, 7, 4, 2, 8, 0, 8, 0, 2, 1, 4, 6, 9, 6, 5, 7]
+    set_test_rand_ints(rand_ints)
+#    pdb.set_trace()
+    generate_n_node_levels(root_node, unique_node_names, levels, min_children, max_children, deterministic_randrange)
+    hierarchical_str = root_node.hierarchical_str()
+    print(get_all_generated_rand_ints())
+    print(hierarchical_str)
+
+    hierarchical_str_2 = root_node.hierarchical_str()
+    assert hierarchical_str == hierarchical_str_2
+    assert hierarchical_str == """generated_name_base_name_20
+├── generated_name_base_name_27
+|   ├── generated_name_base_name_23
+|   ├── generated_name_base_name_21
+|   |   ├── generated_name_base_name_23
+|   |   ├── generated_name_base_name_11
+|   |   |   ├── generated_name_base_name_36
+|   |   |   ├── generated_name_base_name_21
+|   |   |   ├── generated_name_base_name_27
+|   |   |   └── generated_name_base_name_49
+|   |   ├── generated_name_base_name_20
+|   |   └── generated_name_base_name_17
+|   ├── generated_name_base_name_11
+|   |   ├── generated_name_base_name_36
+|   |   ├── generated_name_base_name_21
+|   |   |   ├── generated_name_base_name_23
+|   |   |   ├── generated_name_base_name_11
+|   |   |   ├── generated_name_base_name_20
+|   |   |   └── generated_name_base_name_17
+|   |   ├── generated_name_base_name_27
+|   |   └── generated_name_base_name_49
+|   └── generated_name_base_name_49
+├── generated_name_base_name_21
+|   ├── generated_name_base_name_23
+|   ├── generated_name_base_name_11
+|   |   ├── generated_name_base_name_36
+|   |   ├── generated_name_base_name_21
+|   |   ├── generated_name_base_name_27
+|   |   |   ├── generated_name_base_name_23
+|   |   |   ├── generated_name_base_name_21
+|   |   |   ├── generated_name_base_name_11
+|   |   |   └── generated_name_base_name_49
+|   |   └── generated_name_base_name_49
+|   ├── generated_name_base_name_20
+|   └── generated_name_base_name_17
+└── generated_name_base_name_11
+    ├── generated_name_base_name_36
+    ├── generated_name_base_name_21
+    |   ├── generated_name_base_name_23
+    |   ├── generated_name_base_name_11
+    |   ├── generated_name_base_name_20
+    |   └── generated_name_base_name_17
+    ├── generated_name_base_name_27
+    |   ├── generated_name_base_name_23
+    |   ├── generated_name_base_name_21
+    |   |   ├── generated_name_base_name_23
+    |   |   ├── generated_name_base_name_11
+    |   |   ├── generated_name_base_name_20
+    |   |   └── generated_name_base_name_17
+    |   ├── generated_name_base_name_11
+    |   └── generated_name_base_name_49
+    └── generated_name_base_name_49"""
