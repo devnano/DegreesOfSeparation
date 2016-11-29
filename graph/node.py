@@ -7,12 +7,15 @@ class Node:
     _all_nodes = dict()
 
     def __init__(self, name):
-        self._children_map = OrderedDict()
+        self._children_dict = OrderedDict()
         self._name = name
         self._are_all_children_created = False
 
+    def name(self):
+        return self._name
+
     def add_child(self, node):
-        self._children_map[node._name] = node
+        self._children_dict[node._name] = node
         
     def are_all_children_created(self):
         return self._are_all_children_created
@@ -21,7 +24,19 @@ class Node:
         self._are_all_children_created = True
 
     def children(self):
-        return self._children_map.values()
+        return self._children_dict.values()
+
+    def get_node(self, index_path):
+        n = len(index_path)
+        if(n == 0):
+            return None
+
+        child_node = list(self.children())[index_path[0]]
+
+        if(n == 1):
+            return child_node
+
+        return child_node.get_node(index_path[1:])
 
     def max_depth(self):                
 #        pdb.set_trace()
@@ -45,8 +60,6 @@ class Node:
             max_depth = child_max_depth if child_max_depth > max_depth else max_depth
 
         return max_depth
-
-#    def _rec
 
     def hierarchical_str(self):
         str_segments = list()
@@ -87,6 +100,14 @@ class Node:
 
     def __str__(self):
         return self._name
+
+# In Memory Fetch
+
+    def in_memory_fetch(self, source_root_node):
+        source_root_node
+        self._children_dict = {name:Node(name) for name in source_root_node._children_dict}
+
+# Class methods
 
     @classmethod
     def create(cls, name):

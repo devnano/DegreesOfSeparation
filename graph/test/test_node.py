@@ -74,9 +74,15 @@ def test_name_correct_after_creation():
     n = Node(name)
     assert n._name == name
 
+def test_name_method_correct_after_creation():
+    name = "name"
+    n = Node(name)
+    assert n.name() == name
+    
+
 def test_children_set_after_creation():
     n = Node("")
-    assert n._children_map is not None
+    assert n._children_dict is not None
 
 def test_is_child_after_add():
     n1 = Node("")
@@ -152,12 +158,26 @@ def test_create_node_unique_instances():
     assert n1 is n2
 
 # generation code test
+# fixture
 
 @pytest.fixture
 def unique_node_names():
-#    source_names = generate_unique_names(2000)
     source_names = ['generated_name_base_name_20', 'generated_name_base_name_17', 'generated_name_base_name_23', 'generated_name_base_name_38', 'generated_name_base_name_16', 'generated_name_base_name_27', 'generated_name_base_name_36', 'generated_name_base_name_49', 'generated_name_base_name_11', 'generated_name_base_name_21', 'generated_name_base_name_30', 'generated_name_base_name_10', 'generated_name_base_name_26', 'generated_name_base_name_6', 'generated_name_base_name_5', 'generated_name_base_name_4', 'generated_name_base_name_35', 'generated_name_base_name_40', 'generated_name_base_name_37', 'generated_name_base_name_25', 'generated_name_base_name_13', 'generated_name_base_name_22', 'generated_name_base_name_50', 'generated_name_base_name_43', 'generated_name_base_name_9', 'generated_name_base_name_8', 'generated_name_base_name_34', 'generated_name_base_name_41', 'generated_name_base_name_46', 'generated_name_base_name_29', 'generated_name_base_name_32', 'generated_name_base_name_18', 'generated_name_base_name_42', 'generated_name_base_name_28', 'generated_name_base_name_48', 'generated_name_base_name_44', 'generated_name_base_name_12', 'generated_name_base_name_19', 'generated_name_base_name_3', 'generated_name_base_name_45', 'generated_name_base_name_39', 'generated_name_base_name_7', 'generated_name_base_name_15', 'generated_name_base_name_47', 'generated_name_base_name_2', 'generated_name_base_name_31', 'generated_name_base_name_33', 'generated_name_base_name_24', 'generated_name_base_name_14']
     return source_names
+
+@pytest.fixture
+def root_node_3_levels(unique_node_names):
+    levels = 3
+    min_children = 2
+    max_children = 5
+    root_node = Node.create(list(unique_node_names)[0])
+    rand_ints = [3, 5, 9, 8, 4, 2, 2, 9, 2, 8, 7, 4, 2, 8, 0, 8, 0, 2, 1, 4, 6, 9, 6, 5, 7]
+    set_test_rand_ints(rand_ints)
+    generate_n_node_levels(root_node, unique_node_names, levels, min_children, max_children, deterministic_randrange)
+    
+    return root_node
+
+# End fixtures, start generation code tests
 
 def test_unique_node_names_order(unique_node_names):
     assert list(unique_node_names)[0] == 'generated_name_base_name_20'
@@ -401,15 +421,8 @@ def test_generate_n_node_levels_at_lest_max_depth(unique_node_names):
     # Check that max_depth is at least levels. It could be more than levels since a branch already created can be attached to a certain depth resulting beyond levels
     assert root_node.max_depth() >= levels
 
-def test_generate_n_node_levels_bad_hierarchical_str(unique_node_names):
-    levels = 3
-    min_children = 2
-    max_children = 5
-    root_node = Node.create(list(unique_node_names)[0])
-    rand_ints = [3, 5, 9, 8, 4, 2, 2, 9, 2, 8, 7, 4, 2, 8, 0, 8, 0, 2, 1, 4, 6, 9, 6, 5, 7]
-    set_test_rand_ints(rand_ints)
-#    pdb.set_trace()
-    generate_n_node_levels(root_node, unique_node_names, levels, min_children, max_children, deterministic_randrange)
+def test_generate_n_node_levels_hierarchical_str(root_node_3_levels):
+    root_node = root_node_3_levels
     hierarchical_str = root_node.hierarchical_str()
     print(get_all_generated_rand_ints())
     print(hierarchical_str)
@@ -468,3 +481,63 @@ def test_generate_n_node_levels_bad_hierarchical_str(unique_node_names):
     |   ├── generated_name_base_name_11
     |   └── generated_name_base_name_49
     └── generated_name_base_name_49"""
+
+def test_get_node_with_index_path_invalid(root_node_3_levels):
+    root_node = root_node_3_levels
+    index_path = []
+    result_node = root_node.get_node(index_path)
+
+    assert result_node == None
+
+def test_get_node_with_index_out_of_range(root_node_3_levels):
+    root_node = root_node_3_levels
+    index_path = [10]
+
+    with pytest.raises(IndexError):
+        root_node.get_node(index_path)
+
+def test_get_node_with_index_path_0(root_node_3_levels):
+    root_node = root_node_3_levels
+    index_path = [0]
+    result_node = root_node.get_node(index_path)
+
+    assert result_node.name() == "generated_name_base_name_27"
+
+def test_get_node_with_index_path_0_2(root_node_3_levels):
+    root_node = root_node_3_levels
+    index_path = [0, 2]
+    result_node = root_node.get_node(index_path)
+
+    assert result_node.name() == "generated_name_base_name_11"
+
+def test_get_node_with_index_path_1_1_2_3(root_node_3_levels):
+    root_node = root_node_3_levels
+    index_path = [1, 1, 2, 3]
+    result_node = root_node.get_node(index_path)
+
+    assert result_node.name() == "generated_name_base_name_49"
+
+
+# lazy traverse
+# First apprach: lazy load a tree structure from a given in memory source tree
+
+def test_lazy_in_memory_fetch(root_node_3_levels):
+    source_root_node = root_node_3_levels
+    root_node = Node(source_root_node.name())
+    root_node.in_memory_fetch(source_root_node)
+
+    n = len(root_node.children())
+
+    assert root_node == source_root_node
+    assert n == len(source_root_node.children())
+    assert n == 3
+
+    source_children = list(source_root_node.children())
+    root_children = list(root_node.children())
+
+    for i in range(0, n):
+        source_child = source_children[i]
+        child = root_children[i]
+        assert source_child == child
+
+#def test_node_children_fetch():
