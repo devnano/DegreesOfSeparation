@@ -69,6 +69,7 @@ class Node:
 
     def fetch(self, fetch_strategy):
         fetch_strategy(self)
+        self.set_all_children_created()
 
     def _hierarchical_str(self, str_segments, branch, level=0, i_sibling=0, n_siblings=1, indent_str=''):
         segment = "%s%s%s" % (indent_str, hierarchical_str_prefix(level, i_sibling, n_siblings), self._name)

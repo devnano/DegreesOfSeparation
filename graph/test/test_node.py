@@ -528,13 +528,16 @@ def test_lazy_in_memory_fetch(root_node_3_levels):
         node._children_dict = OrderedDict([(name,Node(name)) for name in source_node._children_dict])
 
     root_node = Node(source_root_node.name())
-    root_node.fetch(in_memory_fetch)
 
+    assert not root_node.are_all_children_created()
+
+    root_node.fetch(in_memory_fetch)
     n = len(root_node.children())
 
     assert root_node == source_root_node
     assert n == len(source_root_node.children())
     assert n == 3
+    assert root_node.are_all_children_created()
 
     source_children = list(source_root_node.children())
     root_children = list(root_node.children())
@@ -544,4 +547,11 @@ def test_lazy_in_memory_fetch(root_node_3_levels):
         child = root_children[i]
         assert source_child == child
 
-#def test_node_children_fetch():
+# def test_node_searchp_self(root_node_3_levels):
+#     root_node = root_node_3_levels
+#     result_node = root_node.search(root_node)
+
+#     assert result_node == root_node
+
+
+#Def test_node_children_fetch():
