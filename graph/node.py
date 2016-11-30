@@ -67,6 +67,9 @@ class Node:
 
         return "\n".join(str_segments)
 
+    def fetch(self, fetch_strategy):
+        fetch_strategy(self)
+
     def _hierarchical_str(self, str_segments, branch, level=0, i_sibling=0, n_siblings=1, indent_str=''):
         segment = "%s%s%s" % (indent_str, hierarchical_str_prefix(level, i_sibling, n_siblings), self._name)
         str_segments.append(segment)
@@ -100,12 +103,6 @@ class Node:
 
     def __str__(self):
         return self._name
-
-# In Memory Fetch
-
-    def in_memory_fetch(self, source_root_node):
-        source_root_node
-        self._children_dict = {name:Node(name) for name in source_root_node._children_dict}
 
 # Class methods
 

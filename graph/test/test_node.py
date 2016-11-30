@@ -523,8 +523,12 @@ def test_get_node_with_index_path_1_1_2_3(root_node_3_levels):
 
 def test_lazy_in_memory_fetch(root_node_3_levels):
     source_root_node = root_node_3_levels
+    # In Memory Fetch
+    def in_memory_fetch(node, source_node=source_root_node):
+        node._children_dict = OrderedDict([(name,Node(name)) for name in source_node._children_dict])
+
     root_node = Node(source_root_node.name())
-    root_node.in_memory_fetch(source_root_node)
+    root_node.fetch(in_memory_fetch)
 
     n = len(root_node.children())
 
