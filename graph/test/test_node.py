@@ -521,17 +521,20 @@ def test_get_node_with_index_path_1_1_2_3(root_node_3_levels):
 # lazy traverse
 # First apprach: lazy load a tree structure from a given in memory source tree
 
-def test_lazy_in_memory_fetch(root_node_3_levels):
-    source_root_node = root_node_3_levels
     # In Memory Fetch
-    def in_memory_fetch(node, source_node=source_root_node):
+def create_in_memory_fetch(source_node):
+    def in_memory_fetch(node, source_node=source_node):
         node._children_dict = OrderedDict([(name,Node(name)) for name in source_node._children_dict])
 
+    return in_memory_fetch
+
+def test_lazy_in_memory_fetch(root_node_3_levels):
+    source_root_node = root_node_3_levels
     root_node = Node(source_root_node.name())
 
     assert not root_node.are_all_children_created()
 
-    root_node.fetch(in_memory_fetch)
+    root_node.fetch(create_in_memory_fetch(source_root_node))
     n = len(root_node.children())
 
     assert root_node == source_root_node
