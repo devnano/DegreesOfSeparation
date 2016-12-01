@@ -11,10 +11,7 @@ def setup_function(function):
     Invoked for every test function in the module.
     """
     Node._all_nodes = dict()
-    reset_randrange()
-    reset_all_generated_rand_ints()
-    set_test_rand_ints([8, 17, 7, 2, 44, 48, 14, 34, 13, 8, 41, 5, 42, 22, 21, 11, 12, 29, 1, 3, 2, 2, 11, 3, 16, 14, 8, 1, 44, 6, 39, 39, 19, 12, 46, 47, 42, 3, 39, 1, 45, 5, 20, 27, 44, 30, 47])
-
+    create_deterministic_randrange([8, 17, 7, 2, 44, 48, 14, 34, 13, 8, 41, 5, 42, 22, 21, 11, 12, 29, 1, 3, 2, 2, 11, 3, 16, 14, 8, 1, 44, 6, 39, 39, 19, 12, 46, 47, 42, 3, 39, 1, 45, 5, 20, 27, 44, 30, 47])
 
 def teardown_function(function):
     """ teardown any state that was previously setup with a setup_function
@@ -23,37 +20,28 @@ def teardown_function(function):
 # testing random stuff
 from random import randrange
 
-rand_ints = list()
-test_randrange_i = 0
-all_rand_ints = None
+deterministic_randrange = None
 
-def get_all_generated_rand_ints():
-    return all_rand_ints
+def create_deterministic_randrange(rand_ints):
+    def randrange_generator(rand_ints=rand_ints):
+        for r in rand_ints:
+            yield r
 
-def reset_all_generated_rand_ints():
-    global all_rand_ints
+    generator = randrange_generator()
 
-    all_rand_ints = list()
+    def _deterministic_randrange(start, end, generator=generator):
+        r = next(generator)
 
-def deterministic_randrange(start, end):
-    global test_randrange_i
-    global rand_ints
-    global all_rand_ints
-#    pdb.set_trace()
-    test_randrange_i += 1
-#    print(test_randrange_i)
-    i = rand_ints[test_randrange_i]
-#    i = randrange(start, end)
-    all_rand_ints.append(i)
-    return i
+        try:
+            _deterministic_randrange.all_rand_ints.append(r)
+        except:
+            _deterministic_randrange.all_rand_ints = list()
+            _deterministic_randrange.all_rand_ints.append(r)
 
-def set_test_rand_ints(_rand_ints):
-    global rand_ints
-    rand_ints = _rand_ints
+        return r
 
-def reset_randrange():
-    global test_randrange_i
-    test_randrange_i = -1
+    global deterministic_randrange
+    deterministic_randrange = _deterministic_randrange
 
 def test_deterministic_randrange_generation():
     i = deterministic_randrange(1, 10)
@@ -171,8 +159,7 @@ def root_node_3_levels(unique_node_names):
     min_children = 2
     max_children = 5
     root_node = Node.create(list(unique_node_names)[0])
-    rand_ints = [3, 5, 9, 8, 4, 2, 2, 9, 2, 8, 7, 4, 2, 8, 0, 8, 0, 2, 1, 4, 6, 9, 6, 5, 7]
-    set_test_rand_ints(rand_ints)
+    create_deterministic_randrange([3, 5, 9, 8, 4, 2, 2, 9, 2, 8, 7, 4, 2, 8, 0, 8, 0, 2, 1, 4, 6, 9, 6, 5, 7])
     generate_n_node_levels(root_node, unique_node_names, levels, min_children, max_children, deterministic_randrange)
     
     return root_node
@@ -422,7 +409,7 @@ def test_generate_n_node_levels_at_lest_max_depth(unique_node_names):
     root_node = Node.create(list(unique_node_names)[0])
     generate_n_node_levels(root_node, unique_node_names, levels, min_children, max_children, deterministic_randrange)
 
-    print(get_all_generated_rand_ints())
+    print(deterministic_randrange.all_rand_ints)
     print(root_node.hierarchical_str())
     # Check that max_depth is at least levels. It could be more than levels since a branch already created can be attached to a certain depth resulting beyond levels
     assert root_node.max_depth() >= levels
@@ -445,7 +432,7 @@ def _load_levels_str(file_name):
 def test_generate_n_node_levels_hierarchical_str(root_node_3_levels, _3_levels_str):
     root_node = root_node_3_levels
     hierarchical_str = root_node.hierarchical_str()
-    print(get_all_generated_rand_ints())
+    print(deterministic_randrange.all_rand_ints)
     print(_3_levels_str)
     print(hierarchical_str)
 
