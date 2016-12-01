@@ -529,9 +529,15 @@ def in_memory_fetch(root_node_3_levels):
 
     return _in_memory_fetch
 
-def test_lazy_in_memory_fetch(in_memory_fetch):
+@pytest.fixture
+def lazy_root_node(root_node_3_levels):
     root_node_name = "generated_name_base_name_20"
     root_node = Node(root_node_name)
+
+    return root_node
+
+def test_lazy_in_memory_fetch(lazy_root_node, in_memory_fetch):
+    root_node = lazy_root_node
 
     assert not root_node.are_all_children_created()
 
@@ -545,11 +551,11 @@ def test_lazy_in_memory_fetch(in_memory_fetch):
     assert root_children[1].name() == "generated_name_base_name_21"
     assert root_children[2].name() == "generated_name_base_name_11"
 
-# def test_node_searchp_self(root_node_3_levels):
-#     root_node = root_node_3_levels
-#     result_node = root_node.search(root_node)
+def test_node_search_self(lazy_root_node, in_memory_fetch):
+    root_node = lazy_root_node
+    result_node = root_node.search(root_node, in_memory_fetch)
 
-#     assert result_node == root_node
-
+    assert result_node == root_node
+    
 
 #Def test_node_children_fetch():
