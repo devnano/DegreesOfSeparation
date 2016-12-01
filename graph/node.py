@@ -61,12 +61,6 @@ class Node:
 
         return max_depth
 
-    def hierarchical_str(self):
-        str_segments = list()
-        self._hierarchical_str(str_segments, list())
-
-        return "\n".join(str_segments)
-
     def fetch(self, fetch_strategy):
         fetch_strategy(self)
         self.set_all_children_created()
@@ -75,8 +69,14 @@ class Node:
         if node == self:
             return self
 
+    def hierarchical_str(self):
+        str_segments = list()
+        self._hierarchical_str(str_segments, list())
+
+        return "".join(str_segments)
+
     def _hierarchical_str(self, str_segments, branch, level=0, i_sibling=0, n_siblings=1, indent_str=''):
-        segment = "%s%s%s" % (indent_str, hierarchical_str_prefix(level, i_sibling, n_siblings), self._name)
+        segment = "%s%s%s\n" % (indent_str, hierarchical_str_prefix(level, i_sibling, n_siblings), self._name)
         str_segments.append(segment)
 
         if self in branch:

@@ -320,7 +320,7 @@ def test_get_hierarchical_indent_level_1_more_sibling():
 def test_node_hierarchical_str_single_level():
     n1 = Node.create("1")
 
-    assert n1.hierarchical_str() == "1"
+    assert n1.hierarchical_str() == "1\n"
 
 
 def test_node_hierarchical_str_2_levels_1_child():
@@ -330,7 +330,8 @@ def test_node_hierarchical_str_2_levels_1_child():
 
     assert n1.hierarchical_str() == \
 """1
-└── 2"""
+└── 2
+"""
 
 def test_node_hierarchical_str_2_levels_2_child():
     n1 = Node.create("1")
@@ -342,7 +343,8 @@ def test_node_hierarchical_str_2_levels_2_child():
     assert n1.hierarchical_str() == \
 """1
 ├── 2
-└── 3"""
+└── 3
+"""
 
 def test_node_hierarchical_str_3_levels_1_child():
     n1 = Node.create("1")
@@ -357,7 +359,8 @@ def test_node_hierarchical_str_3_levels_1_child():
 """1
 ├── 2
 |   └── 21
-└── 3"""
+└── 3
+"""
 
     result = n1.hierarchical_str()
 
@@ -383,7 +386,8 @@ def test_node_hierarchical_str_3_levels_2_child():
 ├── 2
 |   ├── 21
 |   └── 22
-└── 3"""
+└── 3
+"""
 
 def test_node_hierarchical_str_loop():
     n1 = Node.create("1")
@@ -394,7 +398,8 @@ def test_node_hierarchical_str_loop():
     assert n1.hierarchical_str() == \
 """1
 └── 2
-    └── 1"""
+    └── 1
+"""
 
 def test_node_hierarchical_str_loop_2():
     n1 = Node.create("1")
@@ -407,7 +412,8 @@ def test_node_hierarchical_str_loop_2():
 """1
 ├── 2
 |   └── 1
-└── 1"""
+└── 1
+"""
 
 def test_generate_n_node_levels_at_lest_max_depth(unique_node_names):
     levels = 3
@@ -421,66 +427,78 @@ def test_generate_n_node_levels_at_lest_max_depth(unique_node_names):
     # Check that max_depth is at least levels. It could be more than levels since a branch already created can be attached to a certain depth resulting beyond levels
     assert root_node.max_depth() >= levels
 
-def test_generate_n_node_levels_hierarchical_str(root_node_3_levels):
+import os
+
+
+@pytest.yield_fixture
+def _3_levels_str():
+    file_path = "%s/%s" % (os.path.dirname(os.path.abspath(__file__)), "fixture_tree")
+    print(file_path)
+    with open(file_path) as f:
+        yield "".join(f.readlines())
+#     return """generated_name_base_name_20
+# ├── generated_name_base_name_27
+# |   ├── generated_name_base_name_23
+# |   ├── generated_name_base_name_21
+# |   |   ├── generated_name_base_name_23
+# |   |   ├── generated_name_base_name_11
+# |   |   |   ├── generated_name_base_name_36
+# |   |   |   ├── generated_name_base_name_21
+# |   |   |   ├── generated_name_base_name_27
+# |   |   |   └── generated_name_base_name_49
+# |   |   ├── generated_name_base_name_20
+# |   |   └── generated_name_base_name_17
+# |   ├── generated_name_base_name_11
+# |   |   ├── generated_name_base_name_36
+# |   |   ├── generated_name_base_name_21
+# |   |   |   ├── generated_name_base_name_23
+# |   |   |   ├── generated_name_base_name_11
+# |   |   |   ├── generated_name_base_name_20
+# |   |   |   └── generated_name_base_name_17
+# |   |   ├── generated_name_base_name_27
+# |   |   └── generated_name_base_name_49
+# |   └── generated_name_base_name_49
+# ├── generated_name_base_name_21
+# |   ├── generated_name_base_name_23
+# |   ├── generated_name_base_name_11
+# |   |   ├── generated_name_base_name_36
+# |   |   ├── generated_name_base_name_21
+# |   |   ├── generated_name_base_name_27
+# |   |   |   ├── generated_name_base_name_23
+# |   |   |   ├── generated_name_base_name_21
+# |   |   |   ├── generated_name_base_name_11
+# |   |   |   └── generated_name_base_name_49
+# |   |   └── generated_name_base_name_49
+# |   ├── generated_name_base_name_20
+# |   └── generated_name_base_name_17
+# └── generated_name_base_name_11
+#     ├── generated_name_base_name_36
+#     ├── generated_name_base_name_21
+#     |   ├── generated_name_base_name_23
+#     |   ├── generated_name_base_name_11
+#     |   ├── generated_name_base_name_20
+#     |   └── generated_name_base_name_17
+#     ├── generated_name_base_name_27
+#     |   ├── generated_name_base_name_23
+#     |   ├── generated_name_base_name_21
+#     |   |   ├── generated_name_base_name_23
+#     |   |   ├── generated_name_base_name_11
+#     |   |   ├── generated_name_base_name_20
+#     |   |   └── generated_name_base_name_17
+#     |   ├── generated_name_base_name_11
+#     |   └── generated_name_base_name_49
+#     └── generated_name_base_name_49"""
+
+def test_generate_n_node_levels_hierarchical_str(root_node_3_levels, _3_levels_str):
     root_node = root_node_3_levels
     hierarchical_str = root_node.hierarchical_str()
     print(get_all_generated_rand_ints())
+    print(_3_levels_str)
     print(hierarchical_str)
 
     hierarchical_str_2 = root_node.hierarchical_str()
     assert hierarchical_str == hierarchical_str_2
-    assert hierarchical_str == """generated_name_base_name_20
-├── generated_name_base_name_27
-|   ├── generated_name_base_name_23
-|   ├── generated_name_base_name_21
-|   |   ├── generated_name_base_name_23
-|   |   ├── generated_name_base_name_11
-|   |   |   ├── generated_name_base_name_36
-|   |   |   ├── generated_name_base_name_21
-|   |   |   ├── generated_name_base_name_27
-|   |   |   └── generated_name_base_name_49
-|   |   ├── generated_name_base_name_20
-|   |   └── generated_name_base_name_17
-|   ├── generated_name_base_name_11
-|   |   ├── generated_name_base_name_36
-|   |   ├── generated_name_base_name_21
-|   |   |   ├── generated_name_base_name_23
-|   |   |   ├── generated_name_base_name_11
-|   |   |   ├── generated_name_base_name_20
-|   |   |   └── generated_name_base_name_17
-|   |   ├── generated_name_base_name_27
-|   |   └── generated_name_base_name_49
-|   └── generated_name_base_name_49
-├── generated_name_base_name_21
-|   ├── generated_name_base_name_23
-|   ├── generated_name_base_name_11
-|   |   ├── generated_name_base_name_36
-|   |   ├── generated_name_base_name_21
-|   |   ├── generated_name_base_name_27
-|   |   |   ├── generated_name_base_name_23
-|   |   |   ├── generated_name_base_name_21
-|   |   |   ├── generated_name_base_name_11
-|   |   |   └── generated_name_base_name_49
-|   |   └── generated_name_base_name_49
-|   ├── generated_name_base_name_20
-|   └── generated_name_base_name_17
-└── generated_name_base_name_11
-    ├── generated_name_base_name_36
-    ├── generated_name_base_name_21
-    |   ├── generated_name_base_name_23
-    |   ├── generated_name_base_name_11
-    |   ├── generated_name_base_name_20
-    |   └── generated_name_base_name_17
-    ├── generated_name_base_name_27
-    |   ├── generated_name_base_name_23
-    |   ├── generated_name_base_name_21
-    |   |   ├── generated_name_base_name_23
-    |   |   ├── generated_name_base_name_11
-    |   |   ├── generated_name_base_name_20
-    |   |   └── generated_name_base_name_17
-    |   ├── generated_name_base_name_11
-    |   └── generated_name_base_name_49
-    └── generated_name_base_name_49"""
+    assert hierarchical_str == _3_levels_str
 
 def test_get_node_with_index_path_invalid(root_node_3_levels):
     root_node = root_node_3_levels
