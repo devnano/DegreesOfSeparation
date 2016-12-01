@@ -551,11 +551,35 @@ def test_lazy_in_memory_fetch(lazy_root_node, in_memory_fetch):
     assert root_children[1].name() == "generated_name_base_name_21"
     assert root_children[2].name() == "generated_name_base_name_11"
 
-def test_node_search_self(lazy_root_node, in_memory_fetch):
-    root_node = lazy_root_node
-    result_node = root_node.search(root_node, in_memory_fetch)
+# def test_node_search_not_found(lazy_root_node, in_memory_fetch):
+#     root_node = lazy_root_node
+#     to_search = Node("not found")
+#     index_path = root_node.search(to_search, in_memory_fetch)
 
-    assert result_node == root_node
-    
+#     assert index_path == []
 
-#Def test_node_children_fetch():
+# def test_node_search_first_level(lazy_root_node, in_memory_fetch):
+#     root_node = lazy_root_node
+#     to_search = Node("generated_name_base_name_11")
+
+#     index_path = root_node.search(root_node, in_memory_fetch)
+
+#     assert index_path != []
+#     assert root_node.get_node(index_path) == to_search
+
+# def test_node_search_second_level(lazy_root_node, in_memory_fetch):
+#     root_node = lazy_root_node
+#     to_search = Node("generated_name_base_name_21")
+
+#     index_path = root_node.search(root_node, in_memory_fetch)
+
+#     assert index_path != []
+#     assert root_node.get_node(index_path) == to_search
+
+# def test_node_search_self(lazy_root_node, in_memory_fetch):
+#     root_node = lazy_root_node
+#     to_search = root_node
+#     index_path = root_node.search(to_search, in_memory_fetch)
+
+#     assert index_path != []
+#     assert root_node.get_node(index_path) == to_search
