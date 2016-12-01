@@ -430,64 +430,17 @@ def test_generate_n_node_levels_at_lest_max_depth(unique_node_names):
 import os
 
 
-@pytest.yield_fixture
+@pytest.fixture
 def _3_levels_str():
-    file_path = "%s/%s" % (os.path.dirname(os.path.abspath(__file__)), "fixture_tree")
+#    return next(_load_levels_str("fixture_50_nodes_3_levels_tree"))
+    return _load_levels_str("fixture_50_nodes_3_levels_tree")
+
+def _load_levels_str(file_name):
+    file_path = "%s/%s" % (os.path.dirname(os.path.abspath(__file__)), file_name)
     print(file_path)
     with open(file_path) as f:
-        yield "".join(f.readlines())
-#     return """generated_name_base_name_20
-# ├── generated_name_base_name_27
-# |   ├── generated_name_base_name_23
-# |   ├── generated_name_base_name_21
-# |   |   ├── generated_name_base_name_23
-# |   |   ├── generated_name_base_name_11
-# |   |   |   ├── generated_name_base_name_36
-# |   |   |   ├── generated_name_base_name_21
-# |   |   |   ├── generated_name_base_name_27
-# |   |   |   └── generated_name_base_name_49
-# |   |   ├── generated_name_base_name_20
-# |   |   └── generated_name_base_name_17
-# |   ├── generated_name_base_name_11
-# |   |   ├── generated_name_base_name_36
-# |   |   ├── generated_name_base_name_21
-# |   |   |   ├── generated_name_base_name_23
-# |   |   |   ├── generated_name_base_name_11
-# |   |   |   ├── generated_name_base_name_20
-# |   |   |   └── generated_name_base_name_17
-# |   |   ├── generated_name_base_name_27
-# |   |   └── generated_name_base_name_49
-# |   └── generated_name_base_name_49
-# ├── generated_name_base_name_21
-# |   ├── generated_name_base_name_23
-# |   ├── generated_name_base_name_11
-# |   |   ├── generated_name_base_name_36
-# |   |   ├── generated_name_base_name_21
-# |   |   ├── generated_name_base_name_27
-# |   |   |   ├── generated_name_base_name_23
-# |   |   |   ├── generated_name_base_name_21
-# |   |   |   ├── generated_name_base_name_11
-# |   |   |   └── generated_name_base_name_49
-# |   |   └── generated_name_base_name_49
-# |   ├── generated_name_base_name_20
-# |   └── generated_name_base_name_17
-# └── generated_name_base_name_11
-#     ├── generated_name_base_name_36
-#     ├── generated_name_base_name_21
-#     |   ├── generated_name_base_name_23
-#     |   ├── generated_name_base_name_11
-#     |   ├── generated_name_base_name_20
-#     |   └── generated_name_base_name_17
-#     ├── generated_name_base_name_27
-#     |   ├── generated_name_base_name_23
-#     |   ├── generated_name_base_name_21
-#     |   |   ├── generated_name_base_name_23
-#     |   |   ├── generated_name_base_name_11
-#     |   |   ├── generated_name_base_name_20
-#     |   |   └── generated_name_base_name_17
-#     |   ├── generated_name_base_name_11
-#     |   └── generated_name_base_name_49
-#     └── generated_name_base_name_49"""
+        return "".join(f.readlines())
+
 
 def test_generate_n_node_levels_hierarchical_str(root_node_3_levels, _3_levels_str):
     root_node = root_node_3_levels
