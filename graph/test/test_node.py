@@ -522,33 +522,28 @@ def test_get_node_with_index_path_1_1_2_3(root_node_3_levels):
 # First apprach: lazy load a tree structure from a given in memory source tree
 
     # In Memory Fetch
-def create_in_memory_fetch(source_node):
-    def in_memory_fetch(node, source_node=source_node):
+@pytest.fixture
+def in_memory_fetch(root_node_3_levels):
+    def _in_memory_fetch(node, source_node=root_node_3_levels):
         node._children_dict = OrderedDict([(name,Node(name)) for name in source_node._children_dict])
 
-    return in_memory_fetch
+    return _in_memory_fetch
 
-def test_lazy_in_memory_fetch(root_node_3_levels):
-    source_root_node = root_node_3_levels
-    root_node = Node(source_root_node.name())
+def test_lazy_in_memory_fetch(in_memory_fetch):
+    root_node_name = "generated_name_base_name_20"
+    root_node = Node(root_node_name)
 
     assert not root_node.are_all_children_created()
 
-    root_node.fetch(create_in_memory_fetch(source_root_node))
+    root_node.fetch(in_memory_fetch)
     n = len(root_node.children())
-
-    assert root_node == source_root_node
-    assert n == len(source_root_node.children())
-    assert n == 3
-    assert root_node.are_all_children_created()
-
-    source_children = list(source_root_node.children())
     root_children = list(root_node.children())
 
-    for i in range(0, n):
-        source_child = source_children[i]
-        child = root_children[i]
-        assert source_child == child
+    assert n == 3
+    assert root_node.are_all_children_created()
+    assert root_children[0].name() == "generated_name_base_name_27"
+    assert root_children[1].name() == "generated_name_base_name_21"
+    assert root_children[2].name() == "generated_name_base_name_11"
 
 # def test_node_searchp_self(root_node_3_levels):
 #     root_node = root_node_3_levels
