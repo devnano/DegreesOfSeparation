@@ -221,5 +221,7 @@ if __name__ == "__main__":
 
     reset_all_random_ints_generated()
     generate_n_node_levels(root_node, unique_names, levels, min_children_per_level, max_children_per_level)
+
+    print(unique_names)
     print(root_node.hierarchical_str())
     print(all_random_ints_generated)
