@@ -417,16 +417,38 @@ def test_generate_n_node_levels_at_lest_max_depth(unique_node_names):
 import os
 
 
-@pytest.fixture
+@pytest.yield_fixture
 def _3_levels_str():
-#    return next(_load_levels_str("fixture_50_nodes_3_levels_tree"))
-    return _load_levels_str("fixture_50_nodes_3_levels_tree")
+    file_name = "fixture_50_nodes_3_levels_tree"
+    yield next(load_levels_str(file_name))
+#    return _load_levels_str("fixture_50_nodes_3_levels_tree")
 
-def _load_levels_str(file_name):
+@pytest.yield_fixture
+def _3_levels_str():
+    file_name = "fixture_50_nodes_3_levels_tree"
+    yield next(load_levels_str(file_name))
+#    return _load_levels_str("fixture_50_nodes_3_levels_tree")
+
+@pytest.yield_fixture
+def _6_levels_str():
+    file_name = "fixture_5000_nodes_6_levels_tree"
+    yield next(load_levels_str(file_name))
+#    return _load_levels_str("fixture_50_nodes_3_levels_tree")
+
+
+
+
+#def create_load_levels_str():
+def load_levels_str(file_name):
     file_path = "%s/%s" % (os.path.dirname(os.path.abspath(__file__)), file_name)
     print(file_path)
     with open(file_path) as f:
-        return "".join(f.readlines())
+        yield "".join(f.readlines())
+# FIXME: code is not reaching here. This means f file is not being cleaned up.
+    print("Tear down")
+    assert False
+ 
+#    return load_levels_str
 
 
 def test_generate_n_node_levels_hierarchical_str(root_node_3_levels, _3_levels_str):
@@ -488,8 +510,15 @@ def in_memory_fetch(root_node_3_levels):
     return _in_memory_fetch
 
 @pytest.fixture
-def lazy_root_node(root_node_3_levels):
+def lazy_root_node():
     root_node_name = "generated_name_base_name_20"
+    root_node = Node(root_node_name)
+
+    return root_node
+
+@pytest.fixture
+def lazy_root_node_6_levels():
+    root_node_name = "generated_name_base_name_2039"
     root_node = Node(root_node_name)
 
     return root_node
@@ -509,35 +538,39 @@ def test_lazy_in_memory_fetch(lazy_root_node, in_memory_fetch):
     assert root_children[1].name() == "generated_name_base_name_21"
     assert root_children[2].name() == "generated_name_base_name_11"
 
-# def test_node_search_not_found(lazy_root_node, in_memory_fetch):
-#     root_node = lazy_root_node
-#     to_search = Node("not found")
-#     index_path = root_node.search(to_search, in_memory_fetch)
+def test_node_search_not_found(lazy_root_node_6_levels, in_memory_fetch):
+    root_node = lazy_root_node_6_levels
+    to_search = Node("not found")
+    index_path = root_node.search(to_search, in_memory_fetch)
 
-#     assert index_path == []
+    assert index_path == []
 
-# def test_node_search_first_level(lazy_root_node, in_memory_fetch):
-#     root_node = lazy_root_node
-#     to_search = Node("generated_name_base_name_11")
+def test_node_search_first_level(lazy_root_node_6_levels, in_memory_fetch):
+    root_node = lazy_root_node_6_levels
+    to_search = Node("generated_name_base_name_4938")
 
-#     index_path = root_node.search(root_node, in_memory_fetch)
+    index_path = root_node.search(to_search, in_memory_fetch)
 
-#     assert index_path != []
-#     assert root_node.get_node(index_path) == to_search
+    assert index_path == [0]
 
-# def test_node_search_second_level(lazy_root_node, in_memory_fetch):
-#     root_node = lazy_root_node
-#     to_search = Node("generated_name_base_name_21")
+def test_node_search_second_level(lazy_root_node_6_levels, in_memory_fetch):
+    root_node = lazy_root_node_6_levels
+    to_search = Node("generated_name_base_name_124")
 
-#     index_path = root_node.search(root_node, in_memory_fetch)
+    index_path = root_node.search(root_node, in_memory_fetch)
 
-#     assert index_path != []
-#     assert root_node.get_node(index_path) == to_search
+    assert index_path == [0, 1]
 
-# def test_node_search_self(lazy_root_node, in_memory_fetch):
-#     root_node = lazy_root_node
-#     to_search = root_node
-#     index_path = root_node.search(to_search, in_memory_fetch)
+def test_node_search_self(lazy_root_node_6_levels, in_memory_fetch):
+    to_search = lazy_root_node_6_levels
+    index_path = root_node.search(to_search, in_memory_fetch)
 
-#     assert index_path != []
-#     assert root_node.get_node(index_path) == to_search
+    assert index_path == [2, 2, 2, 4, 2]
+
+def test_node_search_deep_level_and_repeated_node(lazy_root_node_6_levels, in_memory_fetch):
+    root_node = lazy_root_node_6_levels
+    to_search = Node("generated_name_base_name_4482")
+
+    index_path = root_node.search(root_node, in_memory_fetch)
+
+    assert index_path == [1, 1, 0, 1]

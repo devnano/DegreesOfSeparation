@@ -67,7 +67,7 @@ class Node:
 
     def search(self, node, fetch_strategy):
         if node == self:
-            return self
+            return []
 
     def hierarchical_str(self):
         str_segments = list()
