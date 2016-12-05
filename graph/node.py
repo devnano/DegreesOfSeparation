@@ -125,7 +125,38 @@ class Node:
         return cls._all_nodes
 
 
-# util function
+    # Parse tree:
+    @classmethod
+    def parse_tree(cls, tree_str):
+        tree_str = tree_str.strip(" \t\n\r")
+        lines = tree_str.split("\n")
+
+    @classmethod
+    def _parse_next_line(cls, lines, root_node=None):
+        if lines == []:
+            return root_node
+            
+        if not root_node:
+            root_node = Node.create(lines[0])
+        else:
+            pass
+
+        return cls._parse_next_lines(lines[1:], root_node)
+
+    @classmethod
+    def _parse_line(cls, line):
+        pass
+
+    
+
+
+
+    class SyntaxError(Exception):
+        def __init__(self,*args,**kwargs):
+            Exception.__init__(self,*args,**kwargs)
+
+
+# util functions
 
 def hierarchical_str_prefix(level, i_sibling, n_siblings):
     assert i_sibling < n_siblings
