@@ -424,19 +424,10 @@ def _3_levels_str():
 #    return _load_levels_str("fixture_50_nodes_3_levels_tree")
 
 @pytest.yield_fixture
-def _3_levels_str():
-    file_name = "fixture_50_nodes_3_levels_tree"
-    yield next(load_levels_str(file_name))
-#    return _load_levels_str("fixture_50_nodes_3_levels_tree")
-
-@pytest.yield_fixture
 def _6_levels_str():
     file_name = "fixture_5000_nodes_6_levels_tree"
     yield next(load_levels_str(file_name))
 #    return _load_levels_str("fixture_50_nodes_3_levels_tree")
-
-
-
 
 #def create_load_levels_str():
 def load_levels_str(file_name):
@@ -577,9 +568,9 @@ def test_lazy_in_memory_fetch(lazy_root_node, in_memory_fetch):
 
 def test_parse_empty_tree():
     tree_str = "  "
-    root_node = parse_tree(tree_str)
+    root_node = Node.parse_tree(tree_str)
 
-    assert not root_node
+    assert root_node == Node("")
 
 def test_single_level_tree():
     tree_str = "1"
@@ -598,103 +589,124 @@ def test_single_3_levels_tree():
     
     assert root_node.hierarchical_str() == tree_str
 
-def test_parse_next_line_emtpy():
+def test_6_levels_tree(_6_levels_str):
+    root_node = Node.parse_tree(_6_levels_str)
+    assert root_node.hierarchical_str() == _6_levels_str
+
+def test_parse_lines_emtpy():
     lines = []
     
-    node = Node._parse_next_line(lines)
+    node = Node._parse_lines(lines)
     assert not node
 
-def test_parse_next_line_root_node():
-    lines = [" 1 "]
+def test_parse_lines_root_node():
+    lines = ["1"]
     
-    node = Node._parse_next_line(lines)
+    node = Node._parse_lines(lines)
     assert node == Node("1")
 
-def test_parse_next_line_root_node_with_not_none_parent_node():
-    lines = [" 1 "]
-    root_node = Node("0")
+def test_parse_lines_root_node():
+    lines = ["1"]
 
     with pytest.raises(Node.SyntaxError):
-        Node._parse_next_line(lines, root_node)
+        Node._parse_lines(lines, None, 1)
 
-def test_parse_next_line_first_level_multiple_children():
+def test_parse_lines_root_node_with_not_none_parent_node():
+    lines = ["1"]
+    root_node = Node.create("0")
+
+    with pytest.raises(Node.SyntaxError):
+        Node._parse_lines(lines, root_node)
+
+def test_parse_lines_first_level_multiple_children():
     tree_str = """1
 └── 2
 """
-    lines = ["├── 2 "]
-    root_node = Node("1")
-    Node._parse_next_line(lines, root_node)
+    lines = ["├── 2"]
+    root_node = Node.create("1")
+    Node._parse_lines(lines, root_node, 1)
     
     assert root_node.hierarchical_str() == tree_str
 
+def test_parse_lines_first_level_multiple_children_bad_current_level():
+    lines = ["├── 2"]
+    root_node = Node.create("1")
 
-def test_parse_next_line_first_level_single_child():
+    with pytest.raises(Node.SyntaxError):
+        # Sending current_level = 0 by default, should fail
+        Node._parse_lines(lines, root_node)
+
+def test_parse_lines_first_level_single_child():
     tree_str = """1
 └── 2
 """
-    lines = ["└── 2 "]
-    root_node = Node("1")
-    Node._parse_next_line(lines, root_node)
-    
+    lines = ["└── 2"]
+    root_node = Node.create("1")
+    Node._parse_lines(lines, root_node, 1)
     assert root_node.hierarchical_str() == tree_str
 
+def test_parse_lines_first_level_bad_child_level():
+    lines = ["    └── generated_name_base_name_49"]
+    root_node = Node.create("1")
 
-def test_parse_next_line_single_3_levels_tree():
+    with pytest.raises(Node.SyntaxError):
+        Node._parse_lines(lines, root_node)
+
+def test_parse_lines_single_3_levels_tree():
     tree_str = """2
 └── 3
 """
-
-    lines = ["└── 3 "]
-    root_node = Node("1")
-    first_child = Node("2")
-
-    Node._parse_next_line(lines, root_node)
+    lines = ["└── 3"]
+    first_child = Node.create("2")
+    Node._parse_lines(lines, first_child, 1)
     
-    assert root_node.hierarchical_str() == tree_str
+    assert first_child.hierarchical_str() == tree_str
 
 def test_parse_line_root_level():
     line = "first level node"
     result = Node._parse_line(line)
     
-    assert result[0] == Node(line)
-    assert result[1] == 0
-
+    assert result[0] == 0
+    assert result[1] == Node(line)
+    assert result[2]
 
 def test_parse_line_first_level():
     line = "├── First level node"
     result = Node._parse_line(line)
     
-    assert result[0] == Node("First level node")
-    assert result[1] == 1
+    assert result[0] == 1
+    assert result[1] == Node("First level node")
+    assert not result[2]
 
 def test_parse_line_first_level():
     line = "└── First level node"
     result = Node._parse_line(line)
     
-    assert result[0] == Node("First level node")
-    assert result[1] == 1
+    assert result[0] == 1
+    assert result[1] == Node("First level node")
+    assert result[2]
 
 def test_parse_line_first_level():
     line = "├── First level node"
     result = Node._parse_line(line)
 
-    assert result[0] == Node("First level node")
-    assert result[1] == 1
+    assert result[0] == 1
+    assert result[1] == Node("First level node")
+    assert not result[2]
 
 
 def test_parse_line_second_level_1():
     line = "|   ├── Second level node"
     result = Node._parse_line(line)
     
-    assert result[0] == Node("Second level node")
-    assert result[1] == 2
+    assert result[0] == 2
+    assert result[1] == Node("Second level node")
+    assert not result[2]
 
 def test_parse_line_n_level_1():
     line = "    |   |   └── generated_name_base_name_17"
     result = Node._parse_line(line)
     
-    assert result[0] == Node("generated_name_base_name_17")
-    assert result[1] == 4
-
-
-
+    assert result[0] == 4
+    assert result[1] == Node("generated_name_base_name_17")
+    assert result[2]

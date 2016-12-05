@@ -131,25 +131,60 @@ class Node:
         tree_str = tree_str.strip(" \t\n\r")
         lines = tree_str.split("\n")
 
-    @classmethod
-    def _parse_next_line(cls, lines, root_node=None):
-        if lines == []:
-            return root_node
-            
-        if not root_node:
-            root_node = Node.create(lines[0])
-        else:
-            pass
+        return cls._parse_lines(lines)
 
-        return cls._parse_next_lines(lines[1:], root_node)
+    @classmethod
+    def _parse_lines(cls, lines, root_node=None, current_level=0):
+        if lines == []: return None
+        if (not root_node and current_level != 0) or (root_node and current_level == 0): raise Node.SyntaxError("")
+
+        previous_node = None
+
+        while len(lines):
+            result = cls._parse_line(lines[0])
+            level = result[0]
+            node = result[1]
+
+            if level == current_level:
+                if root_node:
+                    root_node.add_child(node)
+                # Consume current line
+                del lines[0]
+            elif level == current_level + 1: 
+                cls._parse_lines(lines, previous_node, current_level + 1)
+                continue
+            elif level < current_level: 
+                return
+            else: 
+                raise Node.SyntaxError("")
+
+            previous_node = node
+
+        return previous_node if not root_node else None
 
     @classmethod
     def _parse_line(cls, line):
-        pass
+        level = 0
+        last_child_prefix = "└── "
+        final_level_prefixes = {"├── "}
+        middle_level_prefixes = {"    ", "|   "}
+        final_level_prefixes.add(last_child_prefix)
+        is_last_child = True
+        
+        while(True):
+            level_prefix = line[0:4]
+            
+            if not level_prefix in final_level_prefixes | middle_level_prefixes:
+                break
 
-    
+            level += 1
+            line = line[4:]
 
+            if level_prefix in final_level_prefixes:
+                is_last_child = level_prefix == last_child_prefix
+                break
 
+        return (level, Node.create(line), is_last_child)
 
     class SyntaxError(Exception):
         def __init__(self,*args,**kwargs):
