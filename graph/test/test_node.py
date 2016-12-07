@@ -529,42 +529,42 @@ def test_lazy_in_memory_fetch(lazy_root_node, in_memory_fetch):
     assert root_children[1].name() == "generated_name_base_name_21"
     assert root_children[2].name() == "generated_name_base_name_11"
 
-# def test_node_search_not_found(lazy_root_node_6_levels, in_memory_fetch):
-#     root_node = lazy_root_node_6_levels
-#     to_search = Node("not found")
-#     index_path = root_node.search(to_search, in_memory_fetch)
+def test_node_search_not_found(lazy_root_node_6_levels, in_memory_fetch):
+    root_node = lazy_root_node_6_levels
+    to_search = Node("not found")
+    index_path = root_node.search(to_search, in_memory_fetch)
 
-#     assert index_path == []
+    assert index_path == []
 
-# def test_node_search_first_level(lazy_root_node_6_levels, in_memory_fetch):
-#     root_node = lazy_root_node_6_levels
-#     to_search = Node("generated_name_base_name_4938")
+def test_node_search_first_level(lazy_root_node_6_levels, in_memory_fetch):
+    root_node = lazy_root_node_6_levels
+    to_search = Node("generated_name_base_name_4938")
 
-#     index_path = root_node.search(to_search, in_memory_fetch)
+    index_path = root_node.search(to_search, in_memory_fetch)
 
-#     assert index_path == [0]
+    assert index_path == [0]
 
-# def test_node_search_second_level(lazy_root_node_6_levels, in_memory_fetch):
-#     root_node = lazy_root_node_6_levels
-#     to_search = Node("generated_name_base_name_124")
+def test_node_search_second_level(lazy_root_node_6_levels, in_memory_fetch):
+    root_node = lazy_root_node_6_levels
+    to_search = Node("generated_name_base_name_124")
 
-#     index_path = root_node.search(root_node, in_memory_fetch)
+    index_path = root_node.search(to_search, in_memory_fetch)
 
-#     assert index_path == [0, 1]
+    assert index_path == [0, 1]
 
-# def test_node_search_self(lazy_root_node_6_levels, in_memory_fetch):
-#     to_search = lazy_root_node_6_levels
-#     index_path = root_node.search(to_search, in_memory_fetch)
+def test_node_search_self(lazy_root_node_6_levels, in_memory_fetch):
+    to_search = lazy_root_node_6_levels
+    index_path = root_node.search(to_search, in_memory_fetch)
 
-#     assert index_path == [2, 2, 2, 4, 2]
+    assert index_path == [2, 2, 2, 4, 2]
 
-# def test_node_search_deep_level_and_repeated_node(lazy_root_node_6_levels, in_memory_fetch):
-#     root_node = lazy_root_node_6_levels
-#     to_search = Node("generated_name_base_name_4482")
+def test_node_search_deep_level_and_repeated_node(lazy_root_node_6_levels, in_memory_fetch):
+    root_node = lazy_root_node_6_levels
+    to_search = Node("generated_name_base_name_4482")
 
-#     index_path = root_node.search(root_node, in_memory_fetch)
+    index_path = root_node.search(root_node, in_memory_fetch)
 
-#     assert index_path == [1, 1, 0, 1]
+    assert index_path == [1, 1, 0, 1]
 
 def test_parse_empty_tree():
     tree_str = "  "
