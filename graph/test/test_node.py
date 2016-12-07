@@ -164,6 +164,12 @@ def root_node_3_levels(unique_node_names):
     
     return root_node
 
+@pytest.fixture
+def root_node_6_levels(_6_levels_str):
+    root_node = Node.parse_tree(_6_levels_str)
+    
+    return root_node
+
 # End fixtures, start generation code tests
 
 def test_unique_node_names_order(unique_node_names):
@@ -494,11 +500,18 @@ def test_get_node_with_index_path_1_1_2_3(root_node_3_levels):
 
     # In Memory Fetch
 @pytest.fixture
-def in_memory_fetch(root_node_3_levels):
-    def _in_memory_fetch(node, source_node=root_node_3_levels):
+def in_memory_fetch_3_levels_tree(root_node_3_levels):
+    def _in_memory_fetch_3_levels_tree(node, source_node=root_node_3_levels):
         node._children_dict = OrderedDict([(name,Node(name)) for name in source_node._children_dict])
 
-    return _in_memory_fetch
+    return _in_memory_fetch_3_levels_tree
+
+@pytest.fixture
+def in_memory_fetch_6_levels_tree(root_node_6_levels):
+    def _in_memory_fetch_6_levels_tree(node, source_node=root_node_6_levels):
+        node._children_dict = OrderedDict([(name,Node(name)) for name in source_node._children_dict])
+
+    return _in_memory_fetch_6_levels_tree
 
 @pytest.fixture
 def lazy_root_node():
@@ -514,12 +527,12 @@ def lazy_root_node_6_levels():
 
     return root_node
 
-def test_lazy_in_memory_fetch(lazy_root_node, in_memory_fetch):
+def test_lazy_in_memory_fetch_3_levels_tree(lazy_root_node, in_memory_fetch_3_levels_tree):
     root_node = lazy_root_node
 
     assert not root_node.are_all_children_created()
 
-    root_node.fetch(in_memory_fetch)
+    root_node.fetch(in_memory_fetch_3_levels_tree)
     n = len(root_node.children())
     root_children = list(root_node.children())
 
@@ -529,42 +542,80 @@ def test_lazy_in_memory_fetch(lazy_root_node, in_memory_fetch):
     assert root_children[1].name() == "generated_name_base_name_21"
     assert root_children[2].name() == "generated_name_base_name_11"
 
-def test_node_search_not_found(lazy_root_node_6_levels, in_memory_fetch):
-    root_node = lazy_root_node_6_levels
-    to_search = Node("not found")
-    index_path = root_node.search(to_search, in_memory_fetch)
+def test_node_search_at_level_not_found(root_node_6_levels):
+     root_node = root_node_6_levels
+     to_search = Node("not found")
+     index_path = root_node._search_at_level(to_search, 1)
 
-    assert index_path == []
+     assert index_path == []
 
-def test_node_search_first_level(lazy_root_node_6_levels, in_memory_fetch):
-    root_node = lazy_root_node_6_levels
+def test_node_search_at_level_first_level(root_node_6_levels):
+    root_node = root_node_6_levels
     to_search = Node("generated_name_base_name_4938")
 
-    index_path = root_node.search(to_search, in_memory_fetch)
+    index_path = root_node._search_at_level(to_search, 1)
 
     assert index_path == [0]
 
-def test_node_search_second_level(lazy_root_node_6_levels, in_memory_fetch):
-    root_node = lazy_root_node_6_levels
-    to_search = Node("generated_name_base_name_124")
+def test_node_search_at_level_second_level(root_node_6_levels):
+    root_node = root_node_6_levels
+    to_search = Node("generated_name_base_name_1167")
 
-    index_path = root_node.search(to_search, in_memory_fetch)
+#    pdb.set_trace()
+    index_path = root_node._search_at_level(to_search, 2)
 
     assert index_path == [0, 1]
 
-def test_node_search_self(lazy_root_node_6_levels, in_memory_fetch):
-    to_search = lazy_root_node_6_levels
-    index_path = root_node.search(to_search, in_memory_fetch)
+def test_node_search_at_level_self(root_node_6_levels):
+    root_node = root_node_6_levels
+    index_path = root_node._search_at_level(root_node, 5)
 
     assert index_path == [2, 2, 2, 4, 2]
 
-def test_node_search_deep_level_and_repeated_node(lazy_root_node_6_levels, in_memory_fetch):
-    root_node = lazy_root_node_6_levels
+def test_node_search_at_level_deep_level_and_repeated_node(root_node_6_levels):
+    root_node = root_node_6_levels
     to_search = Node("generated_name_base_name_4482")
 
-    index_path = root_node.search(root_node, in_memory_fetch)
+    index_path = root_node._search_at_level(to_search, 5)
 
-    assert index_path == [1, 1, 0, 1]
+    assert index_path == [1, 1, 0, 0, 1]
+
+# def test_node_search_not_found(lazy_root_node_6_levels, in_memory_fetch_6_levels_tree):
+#     root_node = lazy_root_node_6_levels
+#     to_search = Node("not found")
+#     index_path = root_node.search(to_search, in_memory_fetch_6_levels_tree)
+
+#     assert index_path == []
+
+# def test_node_search_first_level(lazy_root_node_6_levels, in_memory_fetch_6_levels_tree):
+#     root_node = lazy_root_node_6_levels
+#     to_search = Node("generated_name_base_name_4938")
+
+#     index_path = root_node.search(to_search, in_memory_fetch_6_levels_tree)
+
+#     assert index_path == [0]
+
+# def test_node_search_second_level(lazy_root_node_6_levels, in_memory_fetch_6_levels_tree):
+#     root_node = lazy_root_node_6_levels
+#     to_search = Node("generated_name_base_name_1167")
+
+#     index_path = root_node.search(to_search, in_memory_fetch_6_levels_tree)
+
+#     assert index_path == [0, 1]
+
+# def test_node_search_self(lazy_root_node_6_levels, in_memory_fetch_6_levels_tree):
+#     root_node = lazy_root_node_6_levels
+#     index_path = root_node.search(root_node, in_memory_fetch_6_levels_tree)
+
+#     assert index_path == [2, 2, 2, 4, 2]
+
+# def test_node_search_deep_level_and_repeated_node(lazy_root_node_6_levels, in_memory_fetch_6_levels_tree):
+#     root_node = lazy_root_node_6_levels
+#     to_search = Node("generated_name_base_name_4482")
+
+#     index_path = root_node.search(root_node, in_memory_fetch_6_levels_tree)
+
+#     assert index_path == [1, 1, 0, 1]
 
 def test_parse_empty_tree():
     tree_str = "  "
@@ -588,6 +639,12 @@ def test_single_3_levels_tree():
     root_node = Node.parse_tree(tree_str)
     
     assert root_node.hierarchical_str() == tree_str
+    assert root_node.are_all_children_created()
+    assert root_node.get_node([0]).are_all_children_created()
+    assert root_node.get_node([1]).are_all_children_created()
+    assert root_node.get_node([0,0]).are_all_children_created()
+    assert root_node.get_node([0,1]).are_all_children_created()
+
 
 def test_6_levels_tree(_6_levels_str):
     root_node = Node.parse_tree(_6_levels_str)

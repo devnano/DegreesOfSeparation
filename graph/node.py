@@ -39,7 +39,6 @@ class Node:
         return child_node.get_node(index_path[1:])
 
     def max_depth(self):                
-#        pdb.set_trace()
         return self._max_depth(set())
 
     def _max_depth(self, branch):
@@ -66,8 +65,45 @@ class Node:
         self.set_all_children_created()
 
     def search(self, node, fetch_strategy):
-        if node == self:
+        return self._search(node, fetch_strategy, [], set())
+
+    def _search(self, node, fetch_strategy, index_path, branch):
+        pass
+
+    def _search_at_level(self, node, level, fetch_strategy=None, index_path=None, branch=None):
+        assert level >= 1
+
+        if branch and self in branch:
+            # We hit a loop, not found
             return []
+        
+        if not index_path:
+            index_path = []
+
+        if not branch:
+            branch = set()
+
+        branch.add(self)
+
+        if not self.are_all_children_created():
+            self.fetch(fetch_strategy)
+            
+        children = list(self.children())
+
+        for i in range(0, len(children)):
+            child_index_path = index_path.copy()
+            child_index_path.append(i)
+            child = children[i]
+
+            if level == 1:
+                found_index_path = child_index_path if child == node else []
+            else:
+                found_index_path = child._search_at_level(node, level - 1, fetch_strategy, child_index_path, branch.copy())
+
+            if found_index_path != []:
+                return found_index_path
+
+        return []
 
     def hierarchical_str(self):
         str_segments = list()
@@ -144,6 +180,7 @@ class Node:
             result = cls._parse_line(lines[0])
             level = result[0]
             node = result[1]
+            node.set_all_children_created()
 
             if level == current_level:
                 if root_node:
