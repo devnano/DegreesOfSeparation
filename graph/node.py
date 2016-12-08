@@ -64,11 +64,16 @@ class Node:
         fetch_strategy(self)
         self.set_all_children_created()
 
-    def search(self, node, fetch_strategy):
-        return self._search(node, fetch_strategy, [], set())
+    def search(self, node, fetch_strategy=None):
+        # TODO: very naïve implementation of search. It will be necessary to improve it at some time.
+        max_depth = self.max_depth()
+        level = 1
+        index_path = None
+        while level <= max_depth and not index_path:
+            index_path = self._search_at_level(node, level, fetch_strategy)
+            level += 1
 
-    def _search(self, node, fetch_strategy, index_path, branch):
-        pass
+        return index_path
 
     def _search_at_level(self, node, level, fetch_strategy=None, index_path=None, branch=None):
         assert level >= 1
@@ -307,6 +312,20 @@ def generate_n_node_levels(root_node, unique_node_names, levels, min_children, m
     for child in root_node.children():
         generate_n_node_levels(child, unique_node_names, levels - 1, min_children, max_children, randr)
 
+# Tree loading from Fixture files
+
+import os
+
+def load_6_level_tree():
+    file_name = "fixture_5000_nodes_6_levels_tree"
+    file_path = "%s/test/%s" % (os.path.dirname(os.path.abspath(__file__)), file_name)
+    print(file_path)
+    lines = None
+    with open(file_path) as f:
+         lines = "".join(f.readlines())
+
+    root_node = Node.parse_tree(lines)
+    return root_node
 # Main Executable
 
 import sys
