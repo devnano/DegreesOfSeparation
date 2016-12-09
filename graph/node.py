@@ -1,37 +1,30 @@
+from mongoengine import *
 from collections import OrderedDict
 import pdb
 
-class Node:
+class Node(Document):
     """Represents a Node in the Graph."""
-
-    _all_nodes = dict()
-
-    def __init__(self, name):
-        self._children_dict = OrderedDict()
-        self._name = name
-        self._are_all_children_created = False
-
-    def name(self):
-        return self._name
+    name = StringField(max_length=200, required=True)
+    children = ListField(ReferenceField("Node"))
 
     def add_child(self, node):
-        self._children_dict[node._name] = node
+        if not node in self.children:
+            self.children.append(node)
         
     def are_all_children_created(self):
-        return self._are_all_children_created
+        # TODO: improve this logic
+        return hasattr(self, "_are_all_children_created") and self._are_all_children_created
 
     def set_all_children_created(self):
+        # TODO: improve this logic
         self._are_all_children_created = True
-
-    def children(self):
-        return self._children_dict.values()
 
     def get_node(self, index_path):
         n = len(index_path)
         if(n == 0):
             return None
 
-        child_node = list(self.children())[index_path[0]]
+        child_node = list(self.children)[index_path[0]]
 
         if(n == 1):
             return child_node
@@ -48,12 +41,12 @@ class Node:
 
         branch.add(self)
 
-        if len(self.children()) == 0:
+        if len(self.children) == 0:
             # We are a leaf, return len
             return len(branch)
 
         max_depth = 0
-        for child in self.children():
+        for child in self.children:
             # create a new branch
             child_max_depth = child._max_depth(branch.copy())
             max_depth = child_max_depth if child_max_depth > max_depth else max_depth
@@ -93,7 +86,7 @@ class Node:
         if not self.are_all_children_created():
             self.fetch(fetch_strategy)
             
-        children = list(self.children())
+        children = list(self.children)
 
         for i in range(0, len(children)):
             child_index_path = index_path.copy()
@@ -117,7 +110,7 @@ class Node:
         return "".join(str_segments)
 
     def _hierarchical_str(self, str_segments, branch, level=0, i_sibling=0, n_siblings=1, indent_str=''):
-        segment = "%s%s%s\n" % (indent_str, hierarchical_str_prefix(level, i_sibling, n_siblings), self._name)
+        segment = "%s%s%s\n" % (indent_str, hierarchical_str_prefix(level, i_sibling, n_siblings), self.name)
         str_segments.append(segment)
 
         if self in branch:
@@ -129,18 +122,18 @@ class Node:
         indent_str = "%s%s" % (indent_str, get_hierarchical_indent(level, i_sibling, n_siblings))
 
         i = 0
-        n = len(self.children())
-        for child in self.children():
+        n = len(self.children)
+        for child in self.children:
             child._hierarchical_str(str_segments, branch.copy(), level + 1, i, n, indent_str)
             i = i + 1
     
     def __hash__(self):
-        return hash(self._name)
+        return hash(self.name)
 
     def __eq__(self, other):
         """Override the default Equals behavior"""
         if isinstance(other, self.__class__):
-            return self._name == other._name
+            return self.name == other.name
         return False
 
     def __ne__(self, other):
@@ -148,7 +141,7 @@ class Node:
         return not self.__eq__(other)
 
     def __str__(self):
-        return self._name
+        return self.name
 
 # Class methods
 
@@ -309,7 +302,7 @@ def generate_n_node_levels(root_node, unique_node_names, levels, min_children, m
     n = randr(min_children, max_children)
 
     generate_node_random_names(root_node, unique_node_names, n, randr)
-    for child in root_node.children():
+    for child in root_node.children:
         generate_n_node_levels(child, unique_node_names, levels - 1, min_children, max_children, randr)
 
 # Tree loading from Fixture files

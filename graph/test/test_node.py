@@ -60,34 +60,48 @@ def test_deterministic_randrange_generation_second_run():
 def test_name_correct_after_creation():
     name = "name"
     n = Node(name)
-    assert n._name == name
+    assert n.name == name
 
 def test_name_method_correct_after_creation():
     name = "name"
     n = Node(name)
-    assert n.name() == name
-    
+    assert n.name == name
 
 def test_children_set_after_creation():
     n = Node("")
-    assert n._children_dict is not None
+    assert n.children is not None
+
+def test_add_child_single_child():
+    n = Node("1")
+    child = Node("2")
+    n.add_child(child)
+    
+    assert len(n.children) == 1
+
+def test_add_child_duplicates():
+    n = Node("1")
+    child = Node("2")
+    n.add_child(child)
+    n.add_child(child)
+    
+    assert len(n.children) == 1
 
 def test_is_child_after_add():
     n1 = Node("")
     n2 = Node("")
     n1.add_child(n2)
-    assert n2 in n1.children()
+    assert n2 in n1.children
 
 def test_children_len_before_any_add():
     n1 = Node("")
 
-    assert len(n1.children()) == 0
+    assert len(n1.children) == 0
 
 def test_children_len_after_add():
     n1 = Node("")
     n2 = Node("")
     n1.add_child(n2)
-    assert len(n1.children()) == 1
+    assert len(n1.children) == 1
 
 def test_not_all_children_created():
     n = Node("")
@@ -204,7 +218,7 @@ def test_generate_node_random_names(unique_node_names):
     n = 10
     root_node = Node.create(unique_node_names[0])
     generate_node_random_names(root_node, unique_node_names, n)
-    assert len(root_node.children()) == n
+    assert len(root_node.children) == n
 
 def test_max_depth_1():
     n1 = Node.create("1")
@@ -276,7 +290,7 @@ def test_generate_n_node_levels(unique_node_names):
     max_children = 10
     root_node = Node.create(list(unique_node_names)[0])
     generate_n_node_levels(root_node, unique_node_names, levels, min_children, max_children)
-    assert len(root_node.children()) > 0 
+    assert len(root_node.children) > 0 
 
 def test_node_hierarchical_str_prefix_level_0():
     prefix = hierarchical_str_prefix(0, 0, 1)
@@ -478,21 +492,21 @@ def test_get_node_with_index_path_0(root_node_3_levels):
     index_path = [0]
     result_node = root_node.get_node(index_path)
 
-    assert result_node.name() == "generated_name_base_name_27"
+    assert result_node.name == "generated_name_base_name_27"
 
 def test_get_node_with_index_path_0_2(root_node_3_levels):
     root_node = root_node_3_levels
     index_path = [0, 2]
     result_node = root_node.get_node(index_path)
 
-    assert result_node.name() == "generated_name_base_name_11"
+    assert result_node.name == "generated_name_base_name_11"
 
 def test_get_node_with_index_path_1_1_2_3(root_node_3_levels):
     root_node = root_node_3_levels
     index_path = [1, 1, 2, 3]
     result_node = root_node.get_node(index_path)
 
-    assert result_node.name() == "generated_name_base_name_49"
+    assert result_node.name == "generated_name_base_name_49"
 
 
 # lazy traverse
@@ -502,14 +516,14 @@ def test_get_node_with_index_path_1_1_2_3(root_node_3_levels):
 @pytest.fixture
 def in_memory_fetch_3_levels_tree(root_node_3_levels):
     def _in_memory_fetch_3_levels_tree(node, source_node=root_node_3_levels):
-        node._children_dict = OrderedDict([(name,Node(name)) for name in source_node._children_dict])
+        node.children = source_node.children.copy()
 
     return _in_memory_fetch_3_levels_tree
 
 @pytest.fixture
 def in_memory_fetch_6_levels_tree(root_node_6_levels):
     def _in_memory_fetch_6_levels_tree(node, source_node=root_node_6_levels):
-        node._children_dict = OrderedDict([(name,Node(name)) for name in source_node._children_dict])
+        node.children = source_node.children.copy()
 
     return _in_memory_fetch_6_levels_tree
 
@@ -533,14 +547,14 @@ def test_lazy_in_memory_fetch_3_levels_tree(lazy_root_node, in_memory_fetch_3_le
     assert not root_node.are_all_children_created()
 
     root_node.fetch(in_memory_fetch_3_levels_tree)
-    n = len(root_node.children())
-    root_children = list(root_node.children())
+    n = len(root_node.children)
+    root_children = list(root_node.children)
 
     assert n == 3
     assert root_node.are_all_children_created()
-    assert root_children[0].name() == "generated_name_base_name_27"
-    assert root_children[1].name() == "generated_name_base_name_21"
-    assert root_children[2].name() == "generated_name_base_name_11"
+    assert root_children[0].name == "generated_name_base_name_27"
+    assert root_children[1].name == "generated_name_base_name_21"
+    assert root_children[2].name == "generated_name_base_name_11"
 
 def test_node_search_at_level_not_found(root_node_6_levels):
      root_node = root_node_6_levels
