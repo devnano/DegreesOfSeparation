@@ -5,21 +5,38 @@ import pdb
 class Node(Document):
     """Represents a Node in the Graph."""
     name = StringField(max_length=200, required=True)
+    all_children_created = BooleanField()
     children = ListField(ReferenceField("Node"))
+    meta = {"indexes": ["$name"]}
 
     def add_child(self, node):
         if not node in self.children:
             self.children.append(node)
+            self.save()
         
     def are_all_children_created(self):
-        # TODO: improve this logic
-        return hasattr(self, "_are_all_children_created") and self._are_all_children_created
+        return self.all_children_created
 
     def set_all_children_created(self):
-        # TODO: improve this logic
-        self._are_all_children_created = True
+         self.all_children_created = True
+         self.save()
 
+    def set_all_children_created_recursively(self):
+        self._set_all_children_created_recursively([])
+
+    def _set_all_children_created_recursively(self, branch):
+        if self in branch:
+            return
+        
+        branch.append(self)
+
+        for child in self.children:
+            child._set_all_children_created_recursively(branch.copy())
+
+        self.set_all_children_created()
+        
     def get_node(self, index_path):
+        self.fetch()
         n = len(index_path)
         if(n == 0):
             return None
@@ -53,7 +70,9 @@ class Node(Document):
 
         return max_depth
 
-    def fetch(self, fetch_strategy):
+    def fetch(self, fetch_strategy=None):
+        if not fetch_strategy:
+            fetch_strategy = lambda n : n.reload()
         fetch_strategy(self)
         self.set_all_children_created()
 
@@ -110,6 +129,7 @@ class Node(Document):
         return "".join(str_segments)
 
     def _hierarchical_str(self, str_segments, branch, level=0, i_sibling=0, n_siblings=1, indent_str=''):
+        self.fetch()
         segment = "%s%s%s\n" % (indent_str, hierarchical_str_prefix(level, i_sibling, n_siblings), self.name)
         str_segments.append(segment)
 
@@ -147,17 +167,17 @@ class Node(Document):
 
     @classmethod
     def create(cls, name):
-        if name in cls._all_nodes:
-            return cls._all_nodes[name]
+        node = Node.objects(name=name)
+        if node:
+            return node.first()
 
         node = Node(name)
-        cls._all_nodes[name] = node
+        node.save()
         return node
 
     @classmethod
     def get_all_nodes(cls):
-        return cls._all_nodes
-
+        return cls.objects.all()
 
     # Parse tree:
     @classmethod
@@ -165,7 +185,10 @@ class Node(Document):
         tree_str = tree_str.strip(" \t\n\r")
         lines = tree_str.split("\n")
 
-        return cls._parse_lines(lines)
+        root_node = cls._parse_lines(lines)
+        root_node.set_all_children_created_recursively()
+
+        return root_node
 
     @classmethod
     def _parse_lines(cls, lines, root_node=None, current_level=0):
@@ -178,7 +201,6 @@ class Node(Document):
             result = cls._parse_line(lines[0])
             level = result[0]
             node = result[1]
-            node.set_all_children_created()
 
             if level == current_level:
                 if root_node:
@@ -192,7 +214,6 @@ class Node(Document):
                 return
             else: 
                 raise Node.SyntaxError("")
-
             previous_node = node
 
         return previous_node if not root_node else None

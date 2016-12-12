@@ -1,7 +1,6 @@
-from node import Node
 from node import *
+from mongoengine import *
 import pdb
-
 import pytest
 
 # tests setup
@@ -10,7 +9,11 @@ def setup_function(function):
     """ setup any state tied to the execution of the given function.
     Invoked for every test function in the module.
     """
-    Node._all_nodes = dict()
+    # Mongo DB
+    connect("degrees_of_separation_test")
+    Node.drop_collection()
+    
+    # Random
     create_deterministic_randrange([8, 17, 7, 2, 44, 48, 14, 34, 13, 8, 41, 5, 42, 22, 21, 11, 12, 29, 1, 3, 2, 2, 11, 3, 16, 14, 8, 1, 44, 6, 39, 39, 19, 12, 46, 47, 42, 3, 39, 1, 45, 5, 20, 27, 44, 30, 47])
 
 def teardown_function(function):
@@ -59,88 +62,91 @@ def test_deterministic_randrange_generation_second_run():
 
 def test_name_correct_after_creation():
     name = "name"
-    n = Node(name)
+    n = Node.create(name)
     assert n.name == name
 
-def test_name_method_correct_after_creation():
-    name = "name"
-    n = Node(name)
-    assert n.name == name
+def test_empty_setup():
+    assert len(Node.get_all_nodes()) == 0
+
+def test_avoid_duplicates():
+    n1 = Node.create("name")
+    n2 = Node.create("name")
+
+    assert len(Node.get_all_nodes()) == 1
 
 def test_children_set_after_creation():
-    n = Node("")
+    n = Node.create("1")
     assert n.children is not None
 
 def test_add_child_single_child():
-    n = Node("1")
-    child = Node("2")
+    n = Node.create("1")
+    child = Node.create("2")
     n.add_child(child)
     
     assert len(n.children) == 1
 
 def test_add_child_duplicates():
-    n = Node("1")
-    child = Node("2")
+    n = Node.create("1")
+    child = Node.create("2")
     n.add_child(child)
     n.add_child(child)
     
     assert len(n.children) == 1
 
 def test_is_child_after_add():
-    n1 = Node("")
-    n2 = Node("")
+    n1 = Node.create("1")
+    n2 = Node.create("1")
     n1.add_child(n2)
     assert n2 in n1.children
 
 def test_children_len_before_any_add():
-    n1 = Node("")
+    n1 = Node.create("1")
 
     assert len(n1.children) == 0
 
 def test_children_len_after_add():
-    n1 = Node("")
-    n2 = Node("")
+    n1 = Node.create("1")
+    n2 = Node.create("1")
     n1.add_child(n2)
     assert len(n1.children) == 1
 
 def test_not_all_children_created():
-    n = Node("")
+    n = Node.create("1")
     assert not n.are_all_children_created()
 
 def test_all_children_created():
-    n = Node("")
+    n = Node.create("1")
     n.set_all_children_created()
     assert n.are_all_children_created()
 
 def test_node_all_nodes_len():
-    root_node = Node("")
+    root_node = Node("1")
     all_nodes = Node.get_all_nodes()
     assert len(all_nodes) == 0
 
 def test_node_hash():
     name = "unique_name"
-    n1 = Node(name)
-    n2 = Node(name)
+    n1 = Node.create(name)
+    n2 = Node.create(name)
     assert hash(n1) == hash(n2)
 
 def test_node_equality():
     name = "unique_name"
-    n1 = Node(name)
-    n2 = Node(name)
+    n1 = Node.create(name)
+    n2 = Node.create(name)
     assert n1 == n2
 
 def test_node_inequality():
     name = "unique_name"
-    n1 = Node(name)
-    n2 = Node(name)
+    n1 = Node.create(name)
+    n2 = Node.create(name)
     assert (n1 != n2) is False
 
 # class methods
 
-def test_node_get_all_nodes_dict():
+def test_node_get_all_nodes_list():
     all_nodes = Node.get_all_nodes()
-    assert isinstance(all_nodes, dict)
-
+    assert hasattr(all_nodes, "__len__")
 def test_create_node_all_nodes_len_1():
     name = "test_name"
     Node.create(name)
@@ -152,12 +158,6 @@ def test_create_node_all_nodes_len_n(unique_node_names):
         Node.create(name)
     all_nodes = Node.get_all_nodes()
     assert len(all_nodes) == len(unique_node_names)
-
-def test_create_node_unique_instances():
-    name = "unique_name"
-    n1 = Node.create(name)
-    n2 = Node.create(name)
-    assert n1 is n2
 
 # generation code test
 # fixture
@@ -427,6 +427,7 @@ def test_generate_n_node_levels_at_lest_max_depth(unique_node_names):
     min_children = 1
     max_children = 10
     root_node = Node.create(list(unique_node_names)[0])
+#    pdb.set_trace()
     generate_n_node_levels(root_node, unique_node_names, levels, min_children, max_children, deterministic_randrange)
 
     print(deterministic_randrange.all_rand_ints)
@@ -530,14 +531,14 @@ def in_memory_fetch_6_levels_tree(root_node_6_levels):
 @pytest.fixture
 def lazy_root_node():
     root_node_name = "generated_name_base_name_20"
-    root_node = Node(root_node_name)
+    root_node = Node.create(root_node_name)
 
     return root_node
 
 @pytest.fixture
 def lazy_root_node_6_levels():
     root_node_name = "generated_name_base_name_2039"
-    root_node = Node(root_node_name)
+    root_node = Node.crate(root_node_name)
 
     return root_node
 
@@ -558,14 +559,14 @@ def test_lazy_in_memory_fetch_3_levels_tree(lazy_root_node, in_memory_fetch_3_le
 
 def test_node_search_at_level_not_found(root_node_6_levels):
      root_node = root_node_6_levels
-     to_search = Node("not found")
+     to_search = Node.create("not found")
      index_path = root_node._search_at_level(to_search, 1)
 
      assert index_path == []
 
 def test_node_search_at_level_first_level(root_node_6_levels):
     root_node = root_node_6_levels
-    to_search = Node("generated_name_base_name_4938")
+    to_search = Node.create("generated_name_base_name_4938")
 
     index_path = root_node._search_at_level(to_search, 1)
 
@@ -573,7 +574,7 @@ def test_node_search_at_level_first_level(root_node_6_levels):
 
 def test_node_search_at_level_second_level(root_node_6_levels):
     root_node = root_node_6_levels
-    to_search = Node("generated_name_base_name_1167")
+    to_search = Node.create("generated_name_base_name_1167")
 
 #    pdb.set_trace()
     index_path = root_node._search_at_level(to_search, 2)
@@ -588,7 +589,7 @@ def test_node_search_at_level_self(root_node_6_levels):
 
 def test_node_search_at_level_deep_level_and_repeated_node(root_node_6_levels):
     root_node = root_node_6_levels
-    to_search = Node("generated_name_base_name_4482")
+    to_search = Node.create("generated_name_base_name_4482")
 
     index_path = root_node._search_at_level(to_search, 5)
 
@@ -596,14 +597,14 @@ def test_node_search_at_level_deep_level_and_repeated_node(root_node_6_levels):
 
 def test_node_search_not_found(root_node_6_levels):
     root_node = root_node_6_levels
-    to_search = Node("not found")
+    to_search = Node.create("not found")
     index_path = root_node.search(to_search)
 
     assert index_path == []
 
 def test_node_search_first_level(root_node_6_levels):
     root_node = root_node_6_levels
-    to_search = Node("generated_name_base_name_4938")
+    to_search = Node.create("generated_name_base_name_4938")
 
     index_path = root_node.search(to_search)
 
@@ -611,7 +612,7 @@ def test_node_search_first_level(root_node_6_levels):
 
 def test_node_search_second_level(root_node_6_levels):
     root_node = root_node_6_levels
-    to_search = Node("generated_name_base_name_1167")
+    to_search = Node.create("generated_name_base_name_1167")
 
     index_path = root_node.search(to_search)
 
@@ -625,23 +626,23 @@ def test_node_search_self(root_node_6_levels):
 
 def test_node_search_deep_level_and_repeated_node(root_node_6_levels):
     root_node = root_node_6_levels
-    to_search = Node("generated_name_base_name_4482")
+    to_search = Node.create("generated_name_base_name_4482")
 
     index_path = root_node.search(to_search)
 
     assert index_path == [1, 1, 0, 0, 1]
 
 def test_parse_empty_tree():
-    tree_str = "  "
+    tree_str = ""
     root_node = Node.parse_tree(tree_str)
 
-    assert root_node == Node("")
+    assert root_node == Node.create("")
 
 def test_single_level_tree():
     tree_str = "1"
     root_node = Node.parse_tree(tree_str)
     
-    assert root_node == Node(tree_str)
+    assert root_node == Node.create(tree_str)
 
 def test_single_3_levels_tree():
     tree_str = """1
@@ -650,6 +651,7 @@ def test_single_3_levels_tree():
 |   └── 22
 └── 3
 """
+#    pdb.set_trace()
     root_node = Node.parse_tree(tree_str)
     
     assert root_node.hierarchical_str() == tree_str
@@ -659,6 +661,23 @@ def test_single_3_levels_tree():
     assert root_node.get_node([0,0]).are_all_children_created()
     assert root_node.get_node([0,1]).are_all_children_created()
 
+def test_set_all_children_created_recursively():
+    n1 = Node.create("1")
+    n2 = Node.create("2")
+    n21 = Node.create("21")
+    n2.add_child(n21)
+    n22 = Node.create("22")
+    n2.add_child(n22)
+    n3 = Node.create("3")
+    n1.add_child(n2)
+    n1.add_child(n3)
+
+    n1.set_all_children_created_recursively()
+    
+    assert n1.are_all_children_created()
+    assert n1.get_node([0]).are_all_children_created()
+    assert n1.get_node([0,1]).are_all_children_created()
+    assert n1.get_node([1]).are_all_children_created()
 
 def test_6_levels_tree(_6_levels_str):
     root_node = Node.parse_tree(_6_levels_str)
@@ -674,7 +693,7 @@ def test_parse_lines_root_node():
     lines = ["1"]
     
     node = Node._parse_lines(lines)
-    assert node == Node("1")
+    assert node == Node.create("1")
 
 def test_parse_lines_root_node():
     lines = ["1"]
@@ -738,7 +757,7 @@ def test_parse_line_root_level():
     result = Node._parse_line(line)
     
     assert result[0] == 0
-    assert result[1] == Node(line)
+    assert result[1] == Node.create(line)
     assert result[2]
 
 def test_parse_line_first_level():
@@ -746,7 +765,7 @@ def test_parse_line_first_level():
     result = Node._parse_line(line)
     
     assert result[0] == 1
-    assert result[1] == Node("First level node")
+    assert result[1] == Node.create("First level node")
     assert not result[2]
 
 def test_parse_line_first_level():
@@ -754,7 +773,7 @@ def test_parse_line_first_level():
     result = Node._parse_line(line)
     
     assert result[0] == 1
-    assert result[1] == Node("First level node")
+    assert result[1] == Node.create("First level node")
     assert result[2]
 
 def test_parse_line_first_level():
@@ -762,7 +781,7 @@ def test_parse_line_first_level():
     result = Node._parse_line(line)
 
     assert result[0] == 1
-    assert result[1] == Node("First level node")
+    assert result[1] == Node.create("First level node")
     assert not result[2]
 
 
@@ -771,7 +790,7 @@ def test_parse_line_second_level_1():
     result = Node._parse_line(line)
     
     assert result[0] == 2
-    assert result[1] == Node("Second level node")
+    assert result[1] == Node.create("Second level node")
     assert not result[2]
 
 def test_parse_line_n_level_1():
@@ -779,5 +798,5 @@ def test_parse_line_n_level_1():
     result = Node._parse_line(line)
     
     assert result[0] == 4
-    assert result[1] == Node("generated_name_base_name_17")
+    assert result[1] == Node.create("generated_name_base_name_17")
     assert result[2]
